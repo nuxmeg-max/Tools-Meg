@@ -1,0 +1,11 @@
+{
+  "framework": "nextjs",
+  "buildCommand": "next build",
+  "devCommand": "next dev",
+  "installCommand": "npm install",
+  "regions": ["sin1"],
+  "env": {
+    "RAPIDAPI_KEY": "@rapidapi_key",
+    "REMOVE_BG_API_KEY": "@remove_bg_api_key"
+  }
+}
