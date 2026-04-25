@@ -4,6 +4,7 @@
 import Head from 'next/head';
 import { useState, useRef } from 'react';
 import Layout from '../../components/Layout';
+import ToolStats from '../../components/ToolStats';
 
 const TABS = [
   { id: 'photo', label: 'Foto', icon: 'fa-image', accept: 'image/png,image/jpeg,image/webp', hint: 'JPG, PNG, WEBP — maks 12MB' },
@@ -253,6 +254,7 @@ export default function RemoveBgPage() {
           </>
         )}
 
+      <ToolStats toolId="remove-bg" />
       </div>
     </Layout>
   );
