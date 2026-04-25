@@ -3,6 +3,7 @@ import Head from 'next/head';
 import { useState } from 'react';
 import Layout from '../../components/Layout';
 import TikTokDownloader from '../../components/downloader/TikTokDownloader';
+import ToolStats from '../../components/ToolStats';
 import InstagramDownloader from '../../components/downloader/InstagramDownloader';
 import YouTubeDownloader from '../../components/downloader/YouTubeDownloader';
 
@@ -59,9 +60,9 @@ export default function DownloadPage() {
 
         {/* Tab content */}
         <div className="card">
-          {activeTab === 'tiktok' && <TikTokDownloader />}
-          {activeTab === 'instagram' && <InstagramDownloader />}
-          {activeTab === 'youtube' && <YouTubeDownloader />}
+          {activeTab === 'tiktok' && <><TikTokDownloader /><ToolStats toolId="tiktok" /></>}
+          {activeTab === 'instagram' && <><InstagramDownloader /><ToolStats toolId="instagram" /></>}
+          {activeTab === 'youtube' && <><YouTubeDownloader /><ToolStats toolId="youtube" /></>}
         </div>
 
         {/* Info */}
