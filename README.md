@@ -73,7 +73,6 @@ REMOVE_BG_API_KEY=isi_dengan_key_kamu
 
 | Variable | Cara Dapat | Gratis |
 |---|---|---|
-| `RAPIDAPI_KEY` | Daftar di [rapidapi.com](https://rapidapi.com) → cari **ytdlp2** | ✅ 500 req/bulan |
 | `REMOVE_BG_API_KEY` | Daftar di [remove.bg/api](https://www.remove.bg/api) | ✅ 50 foto/bulan |
 
 > TikTok & Instagram tidak butuh API key — menggunakan endpoint sendiri.
