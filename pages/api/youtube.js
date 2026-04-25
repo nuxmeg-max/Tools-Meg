@@ -1,7 +1,6 @@
 // pages/api/youtube.js
-// Menggunakan RapidAPI - yt-dlp (free tier: 500 req/bulan)
-// Daftar di: https://rapidapi.com/ytdlfree/api/ytdlp2
-// Tambahkan di Vercel: RAPIDAPI_KEY=xxxxxxx
+// Menggunakan API: https://api.fromscratch.web.id/v1/api/down/youtube?url=query
+// Audio: client-side extraction via AudioExtractor (Web Audio API) — tidak perlu API key
 
 export default async function handler(req, res) {
   if (req.method !== 'GET') return res.status(405).json({ error: 'Method not allowed' });
@@ -12,73 +11,84 @@ export default async function handler(req, res) {
   const isValidYT = url.includes('youtube.com') || url.includes('youtu.be');
   if (!isValidYT) return res.status(400).json({ error: 'URL bukan link YouTube yang valid.' });
 
-  const apiKey = process.env.RAPIDAPI_KEY;
-  if (!apiKey) return res.status(500).json({ error: 'RAPIDAPI_KEY belum diset di environment variables.' });
-
   try {
-    // Step 1: Ambil info + daftar format video
-    const infoRes = await fetch(
-      `https://ytdlp2.p.rapidapi.com/info?url=${encodeURIComponent(url)}`,
-      {
-        headers: {
-          'x-rapidapi-key': apiKey,
-          'x-rapidapi-host': 'ytdlp2.p.rapidapi.com',
-        },
-      }
-    );
+    const apiUrl = `https://api.fromscratch.web.id/v1/api/down/youtube?url=${encodeURIComponent(url)}`;
 
-    if (!infoRes.ok) throw new Error(`RapidAPI merespons ${infoRes.status}`);
+    const response = await fetch(apiUrl, {
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+        'Accept': 'application/json',
+      },
+    });
 
-    const info = await infoRes.json();
-    if (info.error) throw new Error(info.error);
+    if (!response.ok) throw new Error(`Server API merespons dengan status ${response.status}`);
 
-    // Normalisasi field
-    const title     = info.title     || info.fulltitle || '';
-    const channel   = info.uploader  || info.channel   || '';
-    const thumbnail = info.thumbnail || (info.thumbnails?.[info.thumbnails.length - 1]?.url) || '';
-    const duration  = info.duration_string || formatDuration(info.duration) || '';
+    const data = await response.json();
 
-    // Step 2: Saring format yang berguna
-    const rawFormats = info.formats || [];
+    if (data.error || data.status === false || data.status === 'error') {
+      throw new Error(data.message || data.error || 'Tidak dapat memproses URL ini.');
+    }
 
-    // Pilih format video+audio (ext: mp4), sorted by quality
-    const videoFormats = rawFormats
-      .filter(f =>
-        f.url &&
-        f.vcodec && f.vcodec !== 'none' &&
-        f.acodec && f.acodec !== 'none' &&
-        (f.ext === 'mp4' || f.ext === 'webm')
-      )
-      .sort((a, b) => (b.height || 0) - (a.height || 0))
-      .slice(0, 5) // ambil max 5 kualitas
-      .map(f => ({
-        label:    `${f.height || '?'}p ${f.ext?.toUpperCase() || ''}`,
-        url:      f.url,
-        size:     f.filesize ? formatBytes(f.filesize) : (f.filesize_approx ? '~' + formatBytes(f.filesize_approx) : null),
+    // Normalisasi — coba semua kemungkinan key struktur response
+    const d = data.result || data.data || data;
+
+    const title     = d.title     || d.name      || '';
+    const channel   = d.channel   || d.uploader  || d.author   || '';
+    const thumbnail = d.thumbnail || d.thumb      || d.image    || '';
+    const duration  = d.duration  || d.length     || '';
+
+    // Bangun daftar format dari berbagai kemungkinan struktur response
+    let formats = [];
+
+    // Case 1: array formats
+    if (Array.isArray(d.formats) && d.formats.length > 0) {
+      formats = d.formats.map(f => ({
+        label:    f.quality || f.label || f.resolution || f.format || 'Video',
+        url:      f.url     || f.link  || f.download   || '',
+        size:     f.size    || f.filesize || null,
+        hasAudio: f.hasAudio ?? !(f.type?.toLowerCase().includes('audio')),
+      })).filter(f => f.url);
+    }
+
+    // Case 2: array links
+    else if (Array.isArray(d.links) && d.links.length > 0) {
+      formats = d.links.map(f => ({
+        label:    f.quality || f.label || f.type || 'Video',
+        url:      f.url     || f.link  || '',
+        size:     f.size    || null,
+        hasAudio: !(f.type?.toLowerCase().includes('audio')),
+      })).filter(f => f.url);
+    }
+
+    // Case 3: single URL langsung
+    else if (d.url || d.link || d.download || d.video) {
+      const videoUrl = d.url || d.link || d.download || d.video;
+      formats = [{
+        label:    d.quality || d.resolution || 'HD',
+        url:      videoUrl,
+        size:     d.size || null,
         hasAudio: true,
-        height:   f.height || 0,
-      }));
+      }];
+    }
 
-    // Format audio saja (mp3/m4a)
-    const audioFormats = rawFormats
-      .filter(f =>
-        f.url &&
-        f.acodec && f.acodec !== 'none' &&
-        (f.vcodec === 'none' || !f.vcodec) &&
-        (f.ext === 'm4a' || f.ext === 'mp3' || f.ext === 'webm')
-      )
-      .sort((a, b) => (b.abr || 0) - (a.abr || 0))
-      .slice(0, 2)
-      .map(f => ({
-        label:    `Audio ${f.ext?.toUpperCase() || 'M4A'} ${f.abr ? f.abr + 'kbps' : ''}`.trim(),
-        url:      f.url,
-        size:     f.filesize ? formatBytes(f.filesize) : null,
-        hasAudio: false, // flag: ini audio-only
-      }));
+    // Case 4: key per kualitas (1080p, 720p, dst)
+    else {
+      const qualityKeys = ['2160p','1440p','1080p','720p','480p','360p','240p','144p'];
+      qualityKeys.forEach(q => {
+        if (d[q]) {
+          formats.push({
+            label:    q,
+            url:      typeof d[q] === 'string' ? d[q] : d[q].url || d[q].link || '',
+            size:     typeof d[q] === 'object' ? d[q].size || null : null,
+            hasAudio: true,
+          });
+        }
+      });
+    }
 
-    const formats = [...videoFormats, ...audioFormats];
-
-    if (formats.length === 0) throw new Error('Tidak ada format yang tersedia untuk URL ini.');
+    if (formats.length === 0) {
+      throw new Error('Tidak ada format yang tersedia. Coba URL lain.');
+    }
 
     return res.status(200).json({ title, channel, thumbnail, duration, formats });
 
@@ -87,20 +97,3 @@ export default async function handler(req, res) {
     return res.status(500).json({ error: err.message || 'Terjadi kesalahan server.' });
   }
 }
-
-// ── Helpers ─────────────────────────────────────────────────────────────────
-function formatDuration(seconds) {
-  if (!seconds) return '';
-  const h = Math.floor(seconds / 3600);
-  const m = Math.floor((seconds % 3600) / 60);
-  const s = Math.floor(seconds % 60);
-  if (h > 0) return `${h}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
-  return `${m}:${String(s).padStart(2,'0')}`;
-}
-
-function formatBytes(bytes) {
-  if (!bytes) return null;
-  if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(0) + ' KB';
-  return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
-                                         }
-                   
