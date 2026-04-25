@@ -131,6 +131,46 @@ export default function Home() {
           </div>
         </div>
       </section>
+
+      {/* QRIS Support Section */}
+      <section style={{ padding: '2rem 0 5rem' }}>
+        <div className="container">
+          <div style={{
+            border: '1px solid rgba(255,255,255,0.06)',
+            borderRadius: '6px',
+            padding: '2.5rem 2rem',
+            textAlign: 'center',
+            background: '#0d0d0d',
+          }}>
+            <span className="tag" style={{ marginBottom: '1rem', display: 'inline-block' }}>Support Meg</span>
+            <h2 style={{ fontSize: '1.5rem', fontWeight: 800, marginBottom: '0.5rem', letterSpacing: '-0.03em' }}>
+              Suka dengan Meg?
+            </h2>
+            <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.82rem', color: 'var(--gray-400)', marginBottom: '1.5rem', lineHeight: 1.7 }}>
+              Semua tools ini gratis. Kalau kamu merasa terbantu,<br />
+              kamu bisa support dengan scan QRIS di bawah.
+            </p>
+            <div style={{
+              display: 'inline-block',
+              border: '1px solid rgba(255,255,255,0.1)',
+              borderRadius: '8px',
+              padding: '1rem',
+              background: '#fff',
+              marginBottom: '1rem',
+            }}>
+              <img
+                src="/qris.png"
+                alt="QRIS Support Meg"
+                style={{ width: '200px', height: '200px', display: 'block', objectFit: 'contain' }}
+              />
+            </div>
+            <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.75rem', color: 'var(--gray-600)' }}>
+              <i className="fa-solid fa-heart" style={{ color: '#ff6060', marginRight: '0.3rem' }} />
+              Terima kasih sudah menggunakan Tools Meg!
+            </p>
+          </div>
+        </div>
+      </section>
     </Layout>
   );
 }
