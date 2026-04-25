@@ -1,53 +1,74 @@
 // pages/api/stats.js
-// Menggunakan Vercel KV (Redis) untuk menyimpan likes dan usage count
-// Setup: Vercel Dashboard → Storage → Create KV Database → Connect ke project
-// Otomatis inject env: KV_URL, KV_REST_API_URL, KV_REST_API_TOKEN
-
-import { kv } from '@vercel/kv';
+// Menggunakan Upstash Redis REST API langsung via fetch
+// TIDAK perlu @vercel/kv atau library tambahan apapun
+// Env variables otomatis dari Vercel Storage:
+//   KV_REST_API_URL dan KV_REST_API_TOKEN
 
 const TOOLS = ['tiktok', 'instagram', 'youtube', 'remove-bg', 'text-styler'];
 
+// Helper: call Upstash REST API
+async function redis(commands) {
+  const url  = process.env.KV_REST_API_URL;
+  const token = process.env.KV_REST_API_TOKEN;
+
+  // Fallback jika env belum diset
+  if (!url || !token) return null;
+
+  try {
+    const res = await fetch(`${url}/pipeline`, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(commands),
+    });
+    const data = await res.json();
+    return data;
+  } catch {
+    return null;
+  }
+}
+
 export default async function handler(req, res) {
-  // Izinkan CORS
   res.setHeader('Access-Control-Allow-Origin', '*');
 
   // ── GET: ambil semua stats ──────────────────────────────────────────────
   if (req.method === 'GET') {
-    try {
-      // Ambil semua likes dan usage sekaligus (pipeline = 1 round trip)
-      const pipeline = kv.pipeline();
-      TOOLS.forEach(tool => {
-        pipeline.get(`likes:${tool}`);
-        pipeline.get(`usage:${tool}`);
-      });
-      const results = await pipeline.exec();
+    // Buat pipeline: GET likes dan usage untuk semua tool
+    const commands = [];
+    TOOLS.forEach(tool => {
+      commands.push(['GET', `likes:${tool}`]);
+      commands.push(['GET', `usage:${tool}`]);
+    });
 
-      const stats = {};
-      TOOLS.forEach((tool, i) => {
-        stats[tool] = {
-          likes: parseInt(results[i * 2] || 0),
-          usage: parseInt(results[i * 2 + 1] || 0),
-        };
-      });
+    const results = await redis(commands);
 
-      // Tentukan tool paling populer berdasarkan usage
-      const popular = TOOLS.reduce((a, b) =>
-        (stats[a]?.usage || 0) >= (stats[b]?.usage || 0) ? a : b
-      );
+    const stats = {};
+    TOOLS.forEach((tool, i) => {
+      const likesVal = results?.[i * 2]?.result;
+      const usageVal = results?.[i * 2 + 1]?.result;
+      stats[tool] = {
+        likes: parseInt(likesVal || 0),
+        usage: parseInt(usageVal || 0),
+      };
+    });
 
-      return res.status(200).json({ stats, popular });
-    } catch (err) {
-      console.error('[Stats GET Error]', err.message);
-      // Fallback kalau KV belum disetup — return data kosong
-      const stats = {};
-      TOOLS.forEach(tool => { stats[tool] = { likes: 0, usage: 0 }; });
-      return res.status(200).json({ stats, popular: 'tiktok', fallback: true });
-    }
+    // Tool paling populer berdasarkan usage
+    const popular = TOOLS.reduce((a, b) =>
+      (stats[a]?.usage || 0) >= (stats[b]?.usage || 0) ? a : b
+    );
+
+    return res.status(200).json({
+      stats,
+      popular,
+      fallback: !results,
+    });
   }
 
   // ── POST: increment likes atau usage ───────────────────────────────────
   if (req.method === 'POST') {
-    const { tool, action } = req.body;
+    const { tool, action } = req.body || {};
 
     if (!tool || !TOOLS.includes(tool)) {
       return res.status(400).json({ error: 'Tool tidak valid.' });
@@ -56,24 +77,17 @@ export default async function handler(req, res) {
       return res.status(400).json({ error: 'Action tidak valid.' });
     }
 
-    try {
-      let newValue;
-
-      if (action === 'like') {
-        newValue = await kv.incr(`likes:${tool}`);
-      } else if (action === 'unlike') {
-        const current = parseInt(await kv.get(`likes:${tool}`) || 0);
-        newValue = Math.max(0, current - 1);
-        await kv.set(`likes:${tool}`, newValue);
-      } else if (action === 'use') {
-        newValue = await kv.incr(`usage:${tool}`);
-      }
-
-      return res.status(200).json({ success: true, value: newValue });
-    } catch (err) {
-      console.error('[Stats POST Error]', err.message);
-      return res.status(500).json({ error: 'KV belum disetup. Tambahkan Vercel KV di dashboard.' });
+    let command;
+    if (action === 'like' || action === 'use') {
+      command = [['INCR', `${action === 'use' ? 'usage' : 'likes'}:${tool}`]];
+    } else if (action === 'unlike') {
+      command = [['DECR', `likes:${tool}`]];
     }
+
+    const result = await redis(command);
+    const value = result?.[0]?.result || 0;
+
+    return res.status(200).json({ success: true, value: Math.max(0, value) });
   }
 
   return res.status(405).json({ error: 'Method not allowed' });
