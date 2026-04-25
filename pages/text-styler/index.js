@@ -3,6 +3,7 @@
 import Head from 'next/head';
 import { useState } from 'react';
 import Layout from '../../components/Layout';
+import ToolStats from '../../components/ToolStats';
 
 // Unicode character maps
 const transformers = {
@@ -149,6 +150,7 @@ export default function TextStylerPage() {
             <p style={{ fontFamily: 'var(--font-mono)', color: 'var(--gray-600)', fontSize: '0.85rem' }}>Mulai ketik untuk melihat preview semua gaya teks</p>
           </div>
         )}
+      <ToolStats toolId="text-styler" />
       </div>
     </Layout>
   );
