@@ -11,8 +11,8 @@
   --gray-800: #222222;
   --accent: #e8e8e0;
   --border: rgba(255,255,255,0.08);
-  --font-display: 'Syne', sans-serif;
-  --font-mono: 'DM Mono', monospace;
+  --font-display: 'Syne', 'Arial Black', system-ui, sans-serif;
+  --font-mono: 'DM Mono', 'Courier New', monospace;
   --radius: 4px;
   --transition: 0.2s ease;
 }
