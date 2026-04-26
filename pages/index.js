@@ -1,35 +1,37 @@
-// pages/index.js
+// pages/index.js — Pixel/Retro Game Theme
 import Head from 'next/head';
 import Link from 'next/link';
 import { useState, useEffect } from 'react';
 import Layout from '../components/Layout';
 
 const features = [
-  { href: '/download', icon: 'fa-brands fa-tiktok', label: 'TikTok', desc: 'Download video & audio TikTok tanpa watermark.', tag: 'downloader', toolId: 'tiktok' },
-  { href: '/download', icon: 'fa-brands fa-instagram', label: 'Instagram', desc: 'Download foto, video, reels, dan stories IG.', tag: 'downloader', toolId: 'instagram' },
-  { href: '/download', icon: 'fa-brands fa-youtube', label: 'YouTube', desc: 'Download video & audio YouTube dalam berbagai kualitas.', tag: 'downloader', toolId: 'youtube' },
-  { href: '/remove-bg', icon: 'fa-solid fa-wand-magic-sparkles', label: 'Remove BG', desc: 'Hapus background foto & video secara otomatis dengan AI.', tag: 'ai tool', toolId: 'remove-bg' },
-  { href: '/text-styler', icon: 'fa-solid fa-font', label: 'Text Styler', desc: 'Ubah teks biasa jadi berbagai gaya font unik untuk bio atau caption.', tag: 'generator', toolId: 'text-styler' },
+  { href: '/download', icon: 'fa-brands fa-tiktok',             label: 'TIKTOK',      desc: 'Download video & audio tanpa watermark.', tag: 'downloader', toolId: 'tiktok',      prefix: '▶' },
+  { href: '/download', icon: 'fa-brands fa-instagram',          label: 'INSTAGRAM',   desc: 'Download foto, video, reels & stories.',  tag: 'downloader', toolId: 'instagram',   prefix: '▶' },
+  { href: '/download', icon: 'fa-brands fa-youtube',            label: 'YOUTUBE',     desc: 'Download video & audio multi-kualitas.',  tag: 'downloader', toolId: 'youtube',     prefix: '▶' },
+  { href: '/remove-bg', icon: 'fa-solid fa-wand-magic-sparkles', label: 'REMOVE BG',  desc: 'Hapus background foto dengan AI.',        tag: 'ai tool',    toolId: 'remove-bg',   prefix: '★' },
+  { href: '/text-styler', icon: 'fa-solid fa-font',             label: 'TEXT STYLER', desc: 'Gaya teks Unicode untuk bio & caption.',  tag: 'generator',  toolId: 'text-styler', prefix: '◆' },
+  { href: '/download',    icon: 'fa-brands fa-spotify',           label: 'SPOTIFY',     desc: 'Download lagu & playlist Spotify ke MP3.', tag: 'downloader', toolId: 'spotify',     prefix: '♪' },
 ];
 
-// Video loop hero — pakai free stock video dari Pixabay CDN
-// Ganti src dengan video kamu sendiri kalau mau
 const HERO_VIDEO = '/BannerVID.mp4';
 
 export default function Home() {
-  const [dark, setDark] = useState(true);
+  const [dark, setDark]       = useState(true);
   const [mounted, setMounted] = useState(false);
-  const [stats, setStats] = useState({});
+  const [stats, setStats]     = useState({});
   const [popular, setPopular] = useState('');
+  const [cursor, setCursor]   = useState(true);
 
   useEffect(() => {
     setMounted(true);
-    // Fetch stats untuk homepage
     fetch('/api/stats').then(r => r.json()).then(d => {
       if (d.stats) { setStats(d.stats); setPopular(d.popular); }
     }).catch(() => {});
     const saved = localStorage.getItem('meg-theme');
     if (saved) setDark(saved === 'dark');
+    // Blinking cursor
+    const t = setInterval(() => setCursor(c => !c), 500);
+    return () => clearInterval(t);
   }, []);
 
   useEffect(() => {
@@ -38,229 +40,248 @@ export default function Home() {
     document.documentElement.setAttribute('data-theme', dark ? 'dark' : 'light');
   }, [dark, mounted]);
 
+  const bg   = dark ? '#0a0a0a' : '#f0f0e8';
+  const text = dark ? '#f0f0e8' : '#0a0a0a';
+  const sub  = dark ? '#808078' : '#484840';
+  const cardBg = dark ? '#0d0d0c' : '#e0e0d8';
+  const borderCol = dark ? '#282820' : '#c0c0b8';
+
   return (
     <Layout dark={dark}>
-      <Head><title>Meg — Free Online Tools</title></Head>
+      <Head><title>MEG — FREE ONLINE TOOLS</title></Head>
 
       {/* ── Floating Theme Toggle ── */}
       <button
         onClick={() => setDark(!dark)}
         aria-label="Toggle theme"
         style={{
-          position: 'fixed',
-          bottom: '1.5rem',
-          right: '1.5rem',
-          zIndex: 200,
-          width: '48px',
-          height: '48px',
-          borderRadius: '50%',
-          background: dark ? '#f5f5f0' : '#0a0a0a',
-          color: dark ? '#0a0a0a' : '#f5f5f0',
-          border: 'none',
+          position: 'fixed', bottom: '1.5rem', right: '1.5rem', zIndex: 200,
+          width: '48px', height: '48px',
+          background: text, color: bg,
+          border: `2px solid ${sub}`,
+          boxShadow: `4px 4px 0px ${sub}`,
           cursor: 'pointer',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          fontSize: '1.1rem',
-          boxShadow: dark
-            ? '0 4px 20px rgba(255,255,255,0.15)'
-            : '0 4px 20px rgba(0,0,0,0.3)',
-          transition: 'all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)',
-          transform: 'scale(1)',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          fontSize: '1rem',
+          fontFamily: 'var(--font-display)',
+          transition: 'all 0.05s steps(1)',
         }}
-        onMouseEnter={e => e.currentTarget.style.transform = 'scale(1.12)'}
-        onMouseLeave={e => e.currentTarget.style.transform = 'scale(1)'}
+        onMouseEnter={e => { e.currentTarget.style.transform = 'translate(2px,2px)'; e.currentTarget.style.boxShadow = `2px 2px 0px ${sub}`; }}
+        onMouseLeave={e => { e.currentTarget.style.transform = 'translate(0,0)'; e.currentTarget.style.boxShadow = `4px 4px 0px ${sub}`; }}
       >
         <i className={`fa-solid ${dark ? 'fa-sun' : 'fa-moon'}`} />
       </button>
 
-      {/* ── Hero dengan Video Loop ── */}
+      {/* ── Hero Video ── */}
       <section style={{ position: 'relative', overflow: 'hidden', minHeight: '92vh', display: 'flex', alignItems: 'center' }}>
-
-        {/* Video background */}
-        <video
-          autoPlay
-          loop
-          muted
-          playsInline
-          style={{
-            position: 'absolute', inset: 0,
-            width: '100%', height: '100%',
-            objectFit: 'cover',
-            zIndex: 0,
-            opacity: 0.55,
-          }}
-        >
+        {/* Video */}
+        <video autoPlay loop muted playsInline style={{
+          position: 'absolute', inset: 0,
+          width: '100%', height: '100%',
+          objectFit: 'cover', zIndex: 0,
+          opacity: 0.5,
+          filter: 'grayscale(100%) contrast(1.2)',
+          imageRendering: 'pixelated',
+        }}>
           <source src={HERO_VIDEO} type="video/mp4" />
         </video>
 
-        {/* Gradient overlay supaya teks tetap terbaca */}
+        {/* Overlay */}
         <div style={{
           position: 'absolute', inset: 0, zIndex: 1,
           background: dark
-            ? 'linear-gradient(to bottom, rgba(10,10,10,0.3) 0%, rgba(10,10,10,0.75) 100%)'
-            : 'linear-gradient(to bottom, rgba(245,245,240,0.35) 0%, rgba(245,245,240,0.8) 100%)',
+            ? 'linear-gradient(to bottom, rgba(10,10,10,0.4) 0%, rgba(10,10,10,0.8) 100%)'
+            : 'linear-gradient(to bottom, rgba(240,240,232,0.4) 0%, rgba(240,240,232,0.85) 100%)',
         }} />
 
-        {/* Grid pattern di atas video */}
+        {/* Pixel grid overlay */}
         <div style={{
           position: 'absolute', inset: 0, zIndex: 2,
-          backgroundImage: 'linear-gradient(rgba(255,255,255,0.025) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.025) 1px, transparent 1px)',
-          backgroundSize: '60px 60px',
+          backgroundImage: `linear-gradient(${dark ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.03)'} 1px, transparent 1px), linear-gradient(90deg, ${dark ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.03)'} 1px, transparent 1px)`,
+          backgroundSize: '16px 16px',
         }} />
 
         {/* Content */}
         <div className="container" style={{ position: 'relative', zIndex: 3, textAlign: 'center', padding: '6rem 1.5rem 4rem' }}>
-          <div style={{ marginBottom: '2rem' }}>
-            <span className="tag">Free · No Login · Fast</span>
+
+          {/* Pixel badge */}
+          <div style={{ marginBottom: '2rem', display: 'flex', justifyContent: 'center' }}>
+            <span style={{
+              fontFamily: 'var(--font-display)',
+              fontSize: '0.45rem',
+              border: `2px solid ${sub}`,
+              padding: '0.4rem 0.8rem',
+              color: sub,
+              letterSpacing: '0.15em',
+              background: bg,
+              boxShadow: `3px 3px 0px ${borderCol}`,
+            }}>
+              ★ FREE · NO LOGIN · FAST ★
+            </span>
           </div>
 
+          {/* Pixel title */}
+          <div style={{
+            fontFamily: 'var(--font-display)',
+            fontSize: 'clamp(1rem, 3.5vw, 2rem)',
+            lineHeight: 2,
+            letterSpacing: '0.05em',
+            color: text,
+            marginBottom: '0.5rem',
+            textShadow: dark ? `3px 3px 0px ${borderCol}` : `3px 3px 0px ${borderCol}`,
+          }}>
+            MEG TOOLS<span style={{ color: sub }}>{cursor ? '_' : ' '}</span>
+          </div>
 
+          <div style={{
+            fontFamily: 'var(--font-display)',
+            fontSize: 'clamp(0.5rem, 1.5vw, 0.75rem)',
+            lineHeight: 2.5,
+            color: sub,
+            marginBottom: '2.5rem',
+            letterSpacing: '0.05em',
+          }}>
+            ALL-IN-ONE FREE TOOLS
+          </div>
 
           <p style={{
             fontFamily: 'var(--font-mono)',
-            color: dark ? '#888' : '#555',
-            fontSize: '1rem',
-            maxWidth: '480px',
+            color: sub,
+            fontSize: '0.85rem',
+            maxWidth: '420px',
             margin: '0 auto 2.5rem',
-            lineHeight: 1.7,
+            lineHeight: 1.8,
           }}>
-            Download video dari TikTok, IG, YouTube. Remove background. Style text.
-            Gratis, tanpa daftar.
+            Download TikTok, IG, YouTube. Remove background. Style text. Gratis, tanpa daftar.
           </p>
 
           {/* Buttons */}
-          <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center', flexWrap: 'wrap' }}>
-            <Link href="/download" style={{
-              display: 'inline-flex', alignItems: 'center', gap: '0.5rem',
-              padding: '0.85rem 1.75rem',
-              borderRadius: '100px',
-              fontFamily: 'var(--font-display)',
-              fontWeight: 700,
-              fontSize: '0.88rem',
-              letterSpacing: '0.03em',
-              textTransform: 'uppercase',
-              background: dark ? '#f5f5f0' : '#0a0a0a',
-              color: dark ? '#0a0a0a' : '#f5f5f0',
-              textDecoration: 'none',
-              transition: 'all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1)',
-              boxShadow: dark ? '0 0 0 0 rgba(245,245,240,0)' : '0 0 0 0 rgba(10,10,10,0)',
-            }}
-              onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-3px) scale(1.04)'; e.currentTarget.style.boxShadow = dark ? '0 8px 30px rgba(245,245,240,0.2)' : '0 8px 30px rgba(0,0,0,0.2)'; }}
-              onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0) scale(1)'; e.currentTarget.style.boxShadow = 'none'; }}
-            >
-              <i className="fa-solid fa-download" /> Mulai Download
+          <div style={{ display: 'flex', gap: '1.25rem', justifyContent: 'center', flexWrap: 'wrap' }}>
+            <Link href="/download" className="btn-primary">
+              <i className="fa-solid fa-download" /> START DOWNLOAD
             </Link>
-
-            <Link href="/remove-bg" style={{
-              display: 'inline-flex', alignItems: 'center', gap: '0.5rem',
-              padding: '0.85rem 1.75rem',
-              borderRadius: '100px',
-              fontFamily: 'var(--font-display)',
-              fontWeight: 700,
-              fontSize: '0.88rem',
-              letterSpacing: '0.03em',
-              textTransform: 'uppercase',
-              background: 'transparent',
-              color: dark ? '#f5f5f0' : '#0a0a0a',
-              border: `1px solid ${dark ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.2)'}`,
-              textDecoration: 'none',
-              backdropFilter: 'blur(8px)',
-              transition: 'all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1)',
-            }}
-              onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-3px) scale(1.04)'; e.currentTarget.style.borderColor = dark ? 'rgba(255,255,255,0.5)' : 'rgba(0,0,0,0.5)'; }}
-              onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0) scale(1)'; e.currentTarget.style.borderColor = dark ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.2)'; }}
-            >
-              <i className="fa-solid fa-wand-magic-sparkles" /> Remove BG
+            <Link href="/remove-bg" className="btn-outline">
+              <i className="fa-solid fa-wand-magic-sparkles" /> REMOVE BG
             </Link>
           </div>
 
-          {/* Scroll indicator */}
-          <div style={{ marginTop: '4rem', color: dark ? '#555' : '#aaa' }}>
-            <i className="fa-solid fa-chevron-down" style={{ fontSize: '0.8rem', animation: 'bounce 2s infinite' }} />
+          {/* Pixel scroll indicator */}
+          <div style={{ marginTop: '4rem', color: sub, fontFamily: 'var(--font-display)', fontSize: '0.45rem', letterSpacing: '0.1em' }}>
+            ▼ SCROLL ▼
+          </div>
+        </div>
+      </section>
+
+      {/* ── SELECT TOOL header ── */}
+      <section style={{ padding: '3rem 0 1rem' }}>
+        <div className="container">
+          <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '0.5rem' }}>
+            <div style={{ flex: 1, height: '2px', background: `repeating-linear-gradient(90deg, ${borderCol} 0px, ${borderCol} 8px, transparent 8px, transparent 16px)` }} />
+            <span style={{ fontFamily: 'var(--font-display)', fontSize: '0.5rem', color: sub, letterSpacing: '0.15em', whiteSpace: 'nowrap' }}>SELECT TOOL</span>
+            <div style={{ flex: 1, height: '2px', background: `repeating-linear-gradient(90deg, ${borderCol} 0px, ${borderCol} 8px, transparent 8px, transparent 16px)` }} />
           </div>
         </div>
       </section>
 
       {/* ── Features Grid ── */}
-      <section style={{ padding: '3rem 0 5rem' }}>
+      <section style={{ padding: '0 0 5rem' }}>
         <div className="container">
-          <div style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))',
-            gap: '1px',
-            background: dark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.08)',
-            border: `1px solid ${dark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.08)'}`,
-            borderRadius: '8px',
-            overflow: 'hidden',
-          }}>
-            {features.map((f, i) => (
-              <Link key={i} href={f.href} style={{
-                display: 'block',
-                background: dark ? '#0a0a0a' : '#f5f5f0',
-                padding: '2rem',
-                textDecoration: 'none',
-                transition: 'background 0.2s ease, transform 0.2s ease',
-              }}
-                onMouseEnter={e => e.currentTarget.style.background = dark ? '#141414' : '#ebebeb'}
-                onMouseLeave={e => e.currentTarget.style.background = dark ? '#0a0a0a' : '#f5f5f0'}
-              >
-                <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: '1rem' }}>
-                  <i className={f.icon} style={{ fontSize: '1.6rem', color: dark ? '#d1d1d1' : '#222' }} />
-                  <span className="tag">{f.tag}</span>
-                </div>
-                <h3 style={{ fontSize: '1.2rem', fontWeight: 700, marginBottom: '0.5rem', color: dark ? '#f5f5f0' : '#0a0a0a' }}>{f.label}</h3>
-                <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.82rem', color: dark ? '#888' : '#555', lineHeight: 1.6 }}>{f.desc}</p>
-                {/* Stats row */}
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', marginTop: '1rem', flexWrap: 'wrap' }}>
-                  {popular && f.href.includes(popular.replace('tiktok','download').replace('instagram','download').replace('youtube','download')) && popular === ['tiktok','instagram','youtube'].find(x => f.icon.includes(x)) || popular === 'remove-bg' && f.href === '/remove-bg' || popular === 'text-styler' && f.href === '/text-styler' ? (
-                    <span style={{ display:'inline-flex', alignItems:'center', gap:'0.25rem', background:'linear-gradient(135deg,#f59e0b,#ef4444)', borderRadius:'100px', padding:'0.15rem 0.5rem', fontSize:'0.65rem', fontWeight:700, color:'#fff', letterSpacing:'0.05em', textTransform:'uppercase' }}>
-                      <i className="fa-solid fa-fire" style={{ fontSize:'0.6rem' }}/> Popular
-                    </span>
-                  ) : null}
-                  {stats[f.toolId] && (
-                    <span style={{ fontFamily:'var(--font-mono)', fontSize:'0.72rem', color: dark?'#555':'#999' }}>
-                      <i className="fa-solid fa-users" style={{ marginRight:'0.25rem', fontSize:'0.65rem' }}/>
-                      {stats[f.toolId].usage >= 1000 ? (stats[f.toolId].usage/1000).toFixed(1)+'k' : stats[f.toolId].usage} pengguna
-                    </span>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '4px' }}>
+            {features.map((f, i) => {
+              const isPopular = popular === f.toolId;
+              return (
+                <Link key={i} href={f.href} style={{
+                  display: 'block',
+                  background: cardBg,
+                  padding: '1.75rem',
+                  textDecoration: 'none',
+                  border: `2px solid ${isPopular ? text : borderCol}`,
+                  boxShadow: `4px 4px 0px ${isPopular ? sub : borderCol}`,
+                  position: 'relative',
+                  transition: 'all 0.05s steps(1)',
+                }}
+                  onMouseEnter={e => { e.currentTarget.style.transform = 'translate(2px,2px)'; e.currentTarget.style.boxShadow = `2px 2px 0px ${isPopular ? sub : borderCol}`; }}
+                  onMouseLeave={e => { e.currentTarget.style.transform = 'translate(0,0)'; e.currentTarget.style.boxShadow = `4px 4px 0px ${isPopular ? sub : borderCol}`; }}
+                >
+                  {/* Popular badge */}
+                  {isPopular && (
+                    <div style={{
+                      position: 'absolute', top: '-2px', right: '-2px',
+                      background: text, color: bg,
+                      fontFamily: 'var(--font-display)', fontSize: '0.4rem',
+                      padding: '0.2rem 0.5rem', letterSpacing: '0.1em',
+                    }}>
+                      ★ HOT
+                    </div>
                   )}
-                  {stats[f.toolId] && stats[f.toolId].likes > 0 && (
-                    <span style={{ fontFamily:'var(--font-mono)', fontSize:'0.72rem', color:'#ff6060' }}>
-                      <i className="fa-solid fa-heart" style={{ marginRight:'0.25rem', fontSize:'0.65rem' }}/>
-                      {stats[f.toolId].likes}
-                    </span>
-                  )}
-                </div>
-              </Link>
-            ))}
+
+                  {/* Icon + tag */}
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1rem' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                      <span style={{ color: sub, fontFamily: 'var(--font-display)', fontSize: '0.6rem' }}>{f.prefix}</span>
+                      <i className={f.icon} style={{ fontSize: '1.2rem', color: text }} />
+                    </div>
+                    <span className="tag">{f.tag}</span>
+                  </div>
+
+                  {/* Label */}
+                  <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '0.6rem', letterSpacing: '0.08em', marginBottom: '0.75rem', color: text, lineHeight: 1.8 }}>
+                    {f.label}
+                  </h3>
+
+                  {/* Desc */}
+                  <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.78rem', color: sub, lineHeight: 1.6, marginBottom: '1rem' }}>
+                    {f.desc}
+                  </p>
+
+                  {/* Stats */}
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', borderTop: `1px solid ${borderCol}`, paddingTop: '0.75rem' }}>
+                    {stats[f.toolId] && (
+                      <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.72rem', color: sub }}>
+                        <i className="fa-solid fa-users" style={{ marginRight: '0.3rem', fontSize: '0.65rem' }} />
+                        {stats[f.toolId].usage >= 1000 ? (stats[f.toolId].usage / 1000).toFixed(1) + 'k' : stats[f.toolId].usage}
+                      </span>
+                    )}
+                    {stats[f.toolId] && stats[f.toolId].likes > 0 && (
+                      <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.72rem', color: '#ff6060' }}>
+                        <i className="fa-solid fa-heart" style={{ marginRight: '0.3rem', fontSize: '0.65rem' }} />
+                        {stats[f.toolId].likes}
+                      </span>
+                    )}
+                    <span style={{ marginLeft: 'auto', fontFamily: 'var(--font-display)', fontSize: '0.45rem', color: sub }}>▶ PLAY</span>
+                  </div>
+                </Link>
+              );
+            })}
           </div>
         </div>
       </section>
 
-      {/* ── QRIS Support ── */}
-      <section style={{ padding: '1rem 0 5rem' }}>
+      {/* ── QRIS ── */}
+      <section style={{ padding: '0 0 5rem' }}>
         <div className="container">
           <div style={{
-            border: `1px solid ${dark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.08)'}`,
-            borderRadius: '8px',
+            border: `2px solid ${borderCol}`,
+            boxShadow: `4px 4px 0px ${borderCol}`,
             padding: '2.5rem 2rem',
             textAlign: 'center',
-            background: dark ? '#0d0d0d' : '#efefea',
+            background: cardBg,
+            position: 'relative',
           }}>
-            <span className="tag" style={{ marginBottom: '1rem', display: 'inline-block' }}>Support Meg</span>
-            <h2 style={{ fontSize: '1.5rem', fontWeight: 800, marginBottom: '0.5rem', letterSpacing: '-0.03em', color: dark ? '#f5f5f0' : '#0a0a0a' }}>
-              Suka dengan Meg?
-            </h2>
-            <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.82rem', color: dark ? '#888' : '#555', marginBottom: '1.5rem', lineHeight: 1.7 }}>
-              Semua tools ini gratis. Kalau kamu merasa terbantu,<br />
-              kamu bisa support dengan scan QRIS di bawah.
-            </p>
-            <div style={{ display: 'inline-block', border: '1px solid rgba(0,0,0,0.1)', borderRadius: '8px', padding: '1rem', background: '#fff', marginBottom: '1rem' }}>
-              <img src="/qris.png" alt="QRIS Support Meg" style={{ width: '200px', height: '200px', display: 'block', objectFit: 'contain' }} />
+            <div style={{ position: 'absolute', top: '-1px', left: '50%', transform: 'translateX(-50%)', background: cardBg, padding: '0 0.75rem' }}>
+              <span style={{ fontFamily: 'var(--font-display)', fontSize: '0.45rem', color: sub, letterSpacing: '0.1em' }}>★ SUPPORT MEG ★</span>
             </div>
-            <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.75rem', color: dark ? '#555' : '#888' }}>
-              <i className="fa-solid fa-heart" style={{ color: '#ff6060', marginRight: '0.3rem' }} />
-              Terima kasih sudah menggunakan Meg!
+            <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '0.65rem', letterSpacing: '0.08em', marginBottom: '0.75rem', marginTop: '1rem', color: text, lineHeight: 2 }}>
+              SUKA DENGAN MEG?
+            </h2>
+            <p style={{ fontFamily: 'var(--font-mono)', fontSize: '0.82rem', color: sub, marginBottom: '1.5rem', lineHeight: 1.8 }}>
+              Semua tools gratis. Kalau terbantu, support via QRIS.
+            </p>
+            <div style={{ display: 'inline-block', border: `2px solid ${borderCol}`, boxShadow: `4px 4px 0px ${borderCol}`, padding: '1rem', background: '#fff', marginBottom: '1rem' }}>
+              <img src="/qris.png" alt="QRIS" style={{ width: '200px', height: '200px', display: 'block', imageRendering: 'pixelated' }} />
+            </div>
+            <p style={{ fontFamily: 'var(--font-display)', fontSize: '0.4rem', color: sub, letterSpacing: '0.1em' }}>
+              ♥ THANK YOU FOR PLAYING ♥
             </p>
           </div>
         </div>
@@ -270,17 +291,6 @@ export default function Home() {
         @keyframes bounce {
           0%, 100% { transform: translateY(0); }
           50% { transform: translateY(6px); }
-        }
-        [data-theme="light"] {
-          --black: #f5f5f0;
-          --white: #0a0a0a;
-          --gray-100: #222;
-          --gray-200: #333;
-          --gray-400: #555;
-          --gray-600: #888;
-          --gray-800: #bbb;
-          --border: rgba(0,0,0,0.08);
-          --accent: #e8e8e0;
         }
       `}</style>
     </Layout>
