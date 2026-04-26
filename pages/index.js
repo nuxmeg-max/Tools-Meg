@@ -88,7 +88,7 @@ export default function Home() {
             width: '100%', height: '100%',
             objectFit: 'cover',
             zIndex: 0,
-            opacity: 0.18,
+            opacity: 0.55,
           }}
         >
           <source src={HERO_VIDEO} type="video/mp4" />
@@ -98,8 +98,8 @@ export default function Home() {
         <div style={{
           position: 'absolute', inset: 0, zIndex: 1,
           background: dark
-            ? 'linear-gradient(to bottom, rgba(10,10,10,0.5) 0%, rgba(10,10,10,0.85) 100%)'
-            : 'linear-gradient(to bottom, rgba(245,245,240,0.6) 0%, rgba(245,245,240,0.92) 100%)',
+            ? 'linear-gradient(to bottom, rgba(10,10,10,0.3) 0%, rgba(10,10,10,0.75) 100%)'
+            : 'linear-gradient(to bottom, rgba(245,245,240,0.35) 0%, rgba(245,245,240,0.8) 100%)',
         }} />
 
         {/* Grid pattern di atas video */}
@@ -115,17 +115,7 @@ export default function Home() {
             <span className="tag">Free · No Login · Fast</span>
           </div>
 
-          <h1 style={{
-            fontSize: 'clamp(3rem, 9vw, 6.5rem)',
-            fontWeight: 800,
-            letterSpacing: '-0.05em',
-            lineHeight: 1,
-            marginBottom: '1.5rem',
-            color: dark ? '#f5f5f0' : '#0a0a0a',
-          }}>
-            Semua tools<br />
-            <span style={{ color: dark ? '#888' : '#555' }}>dalam satu tempat.</span>
-          </h1>
+
 
           <p style={{
             fontFamily: 'var(--font-mono)',
