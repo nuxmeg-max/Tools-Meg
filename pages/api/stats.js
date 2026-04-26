@@ -4,7 +4,7 @@
 // Env variables otomatis dari Vercel Storage:
 //   KV_REST_API_URL dan KV_REST_API_TOKEN
 
-const TOOLS = ['tiktok', 'instagram', 'youtube', 'remove-bg', 'text-styler'];
+const TOOLS = ['tiktok', 'instagram', 'youtube', 'remove-bg', 'text-styler', 'spotify'];
 
 // Helper: call Upstash REST API
 async function redis(commands) {
