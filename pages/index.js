@@ -14,7 +14,7 @@ const features = [
 
 // Video loop hero — pakai free stock video dari Pixabay CDN
 // Ganti src dengan video kamu sendiri kalau mau
-const HERO_VIDEO = 'https://cdn.pixabay.com/video/2022/10/20/135552-763004643_large.mp4';
+const HERO_VIDEO = 'public/BannerVID.mp4';
 
 export default function Home() {
   const [dark, setDark] = useState(true);
