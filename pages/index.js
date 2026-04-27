@@ -400,3 +400,6 @@ export default function Home() {
     .video-label { font-size: 1.6rem; }
   }
 `}</style>
+          </Layout>
+  );
+}
