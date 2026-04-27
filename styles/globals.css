@@ -283,7 +283,7 @@ input:focus, textarea:focus, select:focus {
 @keyframes blink { 0%,100% { opacity: 1; } 50% { opacity: 0; } }
 .blink { animation: blink 1s ease infinite; }
 
-/* ===== CARD TITLE (profil-meg style) ===== */
+/* ===== CARD TITLE ===== */
 .card-title {
   font-family: var(--font-display);
   font-size: 0.82rem;
