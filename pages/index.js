@@ -4,23 +4,38 @@ import Link from 'next/link';
 import { useState, useEffect } from 'react';
 import Layout from '../components/Layout';
 
-const features = [
-  { href: '/download',    icon: 'fa-brands fa-tiktok',             label: 'TIKTOK',      desc: 'Download video & audio tanpa watermark.', tag: 'downloader', toolId: 'tiktok',      prefix: '▶' },
-  { href: '/download',    icon: 'fa-brands fa-instagram',          label: 'INSTAGRAM',   desc: 'Download foto, video, reels & stories.',  tag: 'downloader', toolId: 'instagram',   prefix: '▶' },
-  { href: '/download',    icon: 'fa-brands fa-youtube',            label: 'YOUTUBE',     desc: 'Download video & audio multi-kualitas.',  tag: 'downloader', toolId: 'youtube',     prefix: '▶' },
-  { href: '/download',    icon: 'fa-brands fa-spotify',            label: 'SPOTIFY',     desc: 'Download lagu & playlist ke MP3.',        tag: 'downloader', toolId: 'spotify',     prefix: '♪' },
-  { href: '/remove-bg',   icon: 'fa-solid fa-wand-magic-sparkles', label: 'REMOVE BG',   desc: 'Hapus background foto dengan AI.',        tag: 'ai tool',    toolId: 'remove-bg',   prefix: '★' },
-  { href: '/text-styler', icon: 'fa-solid fa-font',                label: 'TEXT STYLER', desc: 'Gaya teks Unicode untuk bio & caption.',  tag: 'generator',  toolId: 'text-styler', prefix: '◆' },
-];
-
 const HERO_VIDEO = '/BannerVID.mp4';
 
+const categories = [
+  {
+    label: 'Downloader',
+    tools: [
+      { href: '/download', icon: 'fa-brands fa-tiktok',    iconColor: '#ee1d52', label: 'TikTok Downloader',    desc: 'Download media from TikTok without watermark', toolId: 'tiktok' },
+      { href: '/download', icon: 'fa-brands fa-youtube',   iconColor: '#ff0000', label: 'YouTube Downloader',   desc: 'Download media from YouTube',                  toolId: 'youtube' },
+      { href: '/download', icon: 'fa-brands fa-instagram', iconColor: '#e1306c', label: 'Instagram Downloader', desc: 'Download foto, video, reels & stories',         toolId: 'instagram' },
+      { href: '/download', icon: 'fa-brands fa-spotify',   iconColor: '#1db954', label: 'Spotify Downloader',   desc: 'Download lagu & playlist ke MP3',               toolId: 'spotify' },
+    ],
+  },
+  {
+    label: 'AI Tools',
+    tools: [
+      { href: '/remove-bg', icon: 'fa-solid fa-wand-magic-sparkles', iconColor: '#a78bfa', label: 'Remove Background', desc: 'Hapus background foto dengan AI', toolId: 'remove-bg' },
+    ],
+  },
+  {
+    label: 'Generator',
+    tools: [
+      { href: '/text-styler', icon: 'fa-solid fa-font', iconColor: '#60a5fa', label: 'Text Styler', desc: 'Gaya teks Unicode untuk bio & caption', toolId: 'text-styler' },
+    ],
+  },
+];
+
 export default function Home() {
-  const [dark, setDark]       = useState(false);
+  const [dark, setDark]       = useState(true);
   const [mounted, setMounted] = useState(false);
   const [stats, setStats]     = useState({});
   const [popular, setPopular] = useState('');
-  const [cursor, setCursor]   = useState(true);
+  const [liked, setLiked]     = useState({});
 
   useEffect(() => {
     setMounted(true);
@@ -29,8 +44,8 @@ export default function Home() {
     }).catch(() => {});
     const saved = localStorage.getItem('meg-theme');
     if (saved) setDark(saved === 'dark');
-    const t = setInterval(() => setCursor(c => !c), 500);
-    return () => clearInterval(t);
+    const savedLiked = JSON.parse(localStorage.getItem('meg-liked') || '{}');
+    setLiked(savedLiked);
   }, []);
 
   useEffect(() => {
@@ -39,227 +54,369 @@ export default function Home() {
     document.documentElement.setAttribute('data-theme', dark ? 'dark' : 'light');
   }, [dark, mounted]);
 
+  const handleLike = async (toolId, e) => {
+    e.preventDefault();
+    const isLiked = liked[toolId];
+    const action = isLiked ? 'unlike' : 'like';
+    const newLiked = { ...liked, [toolId]: !isLiked };
+    setLiked(newLiked);
+    localStorage.setItem('meg-liked', JSON.stringify(newLiked));
+    try {
+      const r = await fetch('/api/stats', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ tool: toolId, action }),
+      });
+      const d = await r.json();
+      if (d.success) {
+        setStats(prev => ({
+          ...prev,
+          [toolId]: { ...prev[toolId], likes: Math.max(0, d.value) },
+        }));
+      }
+    } catch {}
+  };
+
+  const totalTools = categories.reduce((a, c) => a + c.tools.length, 0);
+  const totalUsage = Object.values(stats).reduce((a, s) => a + (s?.usage || 0), 0);
+  const totalLikes = Object.values(stats).reduce((a, s) => a + (s?.likes || 0), 0);
+  const popularTool = categories.flatMap(c => c.tools).find(t => t.toolId === popular);
+
+  const fmt = (n) => n >= 1000 ? (n / 1000).toFixed(1) + 'k' : n;
+
   return (
     <Layout>
       <Head><title>MEG — FREE ONLINE TOOLS</title></Head>
 
-      {/* Floating Theme Toggle */}
-      <button onClick={() => setDark(!dark)} aria-label="Toggle theme" className="fab-theme-btn">
+      {/* Theme Toggle */}
+      <button onClick={() => setDark(!dark)} aria-label="Toggle theme" className="fab-btn">
         <i className={`fa-solid ${dark ? 'fa-sun' : 'fa-moon'}`} />
       </button>
 
-      {/* ===== HERO ===== */}
-      <section className="hero-section">
-        <video autoPlay loop muted playsInline className="hero-video">
-          <source src={HERO_VIDEO} type="video/mp4" />
-        </video>
-        <div className="hero-overlay" />
-        <div className="hero-grid" />
+      <div className="page-wrap">
 
-        <div className="container hero-content">
-          <div style={{ marginBottom: '2rem', display: 'flex', justifyContent: 'center' }}>
-            <span className="hero-badge">★ FREE · NO LOGIN · FAST ★</span>
-          </div>
-
-          <h1 className="hero-title">
-            MEG TOOLS<span className="hero-cursor">{cursor ? '_' : '\u00a0'}</span>
-          </h1>
-
-          <p className="hero-subtitle">ALL-IN-ONE FREE TOOLS</p>
-
-          <p className="hero-desc">
-            Download TikTok, IG, YouTube, Spotify.<br />
-            Remove background. Style text.<br />
-            Gratis, tanpa daftar.
-          </p>
-
-          <div style={{ display: 'flex', gap: '1.25rem', justifyContent: 'center', flexWrap: 'wrap' }}>
-            <Link href="/download" className="btn-primary">
-              <i className="fa-solid fa-download" /> START DOWNLOAD
-            </Link>
-            <Link href="/remove-bg" className="btn-outline">
-              <i className="fa-solid fa-wand-magic-sparkles" /> REMOVE BG
-            </Link>
-          </div>
-
-          <div className="hero-scroll-hint">▼ SCROLL ▼</div>
+        {/* ── HEADER ── */}
+        <div className="page-header">
+          <h1 className="page-title">Available Tools</h1>
+          <p className="page-subtitle">Choose a tool to use from the categories below</p>
         </div>
-      </section>
 
-      {/* ===== SELECT TOOL ===== */}
-      <section style={{ padding: '3rem 0 1rem' }}>
-        <div className="container">
-          <div className="section-sep"><span>SELECT TOOL</span></div>
+        {/* ── VIDEO BANNER ── */}
+        <div className="video-wrap">
+          <video autoPlay loop muted playsInline className="banner-video">
+            <source src={HERO_VIDEO} type="video/mp4" />
+          </video>
+          <div className="video-overlay">
+            <span className="video-label">MEG TOOLS</span>
+          </div>
         </div>
-      </section>
 
-      {/* ===== FEATURES GRID ===== */}
-      <section style={{ padding: '0 0 5rem' }}>
-        <div className="container">
-          <div className="features-grid">
-            {features.map((f, i) => {
-              const isPopular = popular === f.toolId;
-              return (
-                <Link key={i} href={f.href} className={`feature-card${isPopular ? ' feature-card--popular' : ''}`}>
-                  {isPopular && <div className="popular-badge">★ HOT</div>}
+        {/* ── STATS CARDS ── */}
+        <div className="stats-grid">
+          <div className="stat-card">
+            <div className="stat-top">
+              <span className="stat-label">Total Tools</span>
+              <i className="fa-solid fa-grid-2 stat-icon" />
+            </div>
+            <div className="stat-value" style={{ color: '#a78bfa' }}>{totalTools}</div>
+            <div className="stat-sub">Available</div>
+          </div>
+          <div className="stat-card">
+            <div className="stat-top">
+              <span className="stat-label">Total Users</span>
+              <i className="fa-solid fa-users stat-icon" />
+            </div>
+            <div className="stat-value" style={{ color: '#22d3ee' }}>{fmt(totalUsage)}</div>
+            <div className="stat-sub">This Month</div>
+          </div>
+          <div className="stat-card">
+            <div className="stat-top">
+              <span className="stat-label">Total Likes</span>
+              <i className="fa-solid fa-heart stat-icon" />
+            </div>
+            <div className="stat-value" style={{ color: '#f472b6' }}>{fmt(totalLikes)}</div>
+            <div className="stat-sub">Community</div>
+          </div>
+          <div className="stat-card">
+            <div className="stat-top">
+              <span className="stat-label">Popular Tool</span>
+              <i className="fa-solid fa-arrow-trend-up stat-icon" />
+            </div>
+            <div className="stat-value stat-value--sm" style={{ color: '#fbbf24' }}>
+              {popularTool ? popularTool.label : '—'}
+            </div>
+            <div className="stat-sub">
+              {popularTool && stats[popular]
+                ? `${fmt(stats[popular].usage)} users • ${stats[popular].likes} likes`
+                : 'No data yet'}
+            </div>
+          </div>
+        </div>
 
-                  <div className="feature-card-header">
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                      <span className="feature-prefix">{f.prefix}</span>
-                      <i className={f.icon} style={{ fontSize: '1.2rem', color: 'var(--text)' }} />
+        {/* ── TOOL CATEGORIES ── */}
+        {categories.map(cat => (
+          <div key={cat.label} className="category-section">
+            <h2 className="category-label">{cat.label}</h2>
+            <div className="tool-list">
+              {cat.tools.map(tool => {
+                const s = stats[tool.toolId];
+                const isPopular = popular === tool.toolId;
+                const isLiked = liked[tool.toolId];
+                return (
+                  <Link key={tool.toolId} href={tool.href} className={`tool-card${isPopular ? ' tool-card--popular' : ''}`}>
+                    {isPopular && <div className="popular-ribbon">POPULAR</div>}
+
+                    <div className="tool-card-top">
+                      <div className="tool-icon-wrap" style={{ background: tool.iconColor + '22' }}>
+                        <i className={tool.icon} style={{ color: tool.iconColor, fontSize: '1.3rem' }} />
+                      </div>
+                      <div className="tool-info">
+                        <div className="tool-name">{tool.label}</div>
+                        <div className="tool-desc">{tool.desc}</div>
+                      </div>
                     </div>
-                    <span className="tag">{f.tag}</span>
-                  </div>
 
-                  <h3 className="feature-label">{f.label}</h3>
-                  <p className="feature-desc">{f.desc}</p>
-
-                  <div className="feature-footer">
-                    {stats[f.toolId] && (
-                      <span className="feature-stat">
-                        <i className="fa-solid fa-users" />
-                        {stats[f.toolId].usage >= 1000
-                          ? (stats[f.toolId].usage / 1000).toFixed(1) + 'k'
-                          : stats[f.toolId].usage}
-                      </span>
-                    )}
-                    {stats[f.toolId] && stats[f.toolId].likes > 0 && (
-                      <span className="feature-likes">
-                        <i className="fa-solid fa-heart" />
-                        {stats[f.toolId].likes}
-                      </span>
-                    )}
-                    <span className="feature-play">▶ PLAY</span>
-                  </div>
-                </Link>
-              );
-            })}
+                    <div className="tool-card-bottom">
+                      <button
+                        className={`like-btn${isLiked ? ' like-btn--active' : ''}`}
+                        onClick={(e) => handleLike(tool.toolId, e)}
+                        aria-label="Like"
+                      >
+                        <i className={`fa-${isLiked ? 'solid' : 'regular'} fa-heart`} />
+                      </button>
+                      <div className="tool-stats">
+                        {s && (
+                          <>
+                            <span className="tool-stat">
+                              <i className="fa-solid fa-users" /> {fmt(s.usage)}
+                            </span>
+                            <span className="tool-stat">
+                              <i className="fa-solid fa-heart" /> {s.likes}
+                            </span>
+                          </>
+                        )}
+                      </div>
+                    </div>
+                  </Link>
+                );
+              })}
+            </div>
           </div>
-        </div>
-      </section>
+        ))}
 
-      {/* ===== QRIS ===== */}
-      <section style={{ padding: '0 0 5rem' }}>
-        <div className="container">
+        {/* ── QRIS ── */}
+        <div className="qris-section">
           <div className="qris-box">
-            <div className="qris-label">★ SUPPORT MEG ★</div>
+            <div className="qris-top-label">★ SUPPORT MEG ★</div>
             <h2 className="qris-title">SUKA DENGAN MEG?</h2>
             <p className="qris-desc">Semua tools gratis. Kalau terbantu, support via QRIS.</p>
             <div className="qris-img-wrap">
-              <img src="/qris.png" alt="QRIS" style={{ width: '200px', height: '200px', display: 'block' }} />
+              <img src="/qris.png" alt="QRIS" width={200} height={200} />
             </div>
-            <p className="qris-thanks">♥ THANK YOU FOR PLAYING ♥</p>
+            <p className="qris-thanks">♥ THANK YOU ♥</p>
           </div>
         </div>
-      </section>
+
+      </div>
 
       <style jsx>{`
-        .fab-theme-btn {
+        /* ── LAYOUT ── */
+        .page-wrap {
+          max-width: 680px;
+          margin: 0 auto;
+          padding: 80px 16px 60px;
+          min-height: 100vh;
+        }
+
+        /* ── FAB ── */
+        .fab-btn {
           position: fixed; bottom: 1.5rem; right: 1.5rem; z-index: 200;
           width: 48px; height: 48px;
-          background: var(--text); color: var(--bg);
-          border: 2px solid var(--border);
-          box-shadow: var(--shadow-lg);
+          background: #1c1c1e; color: #f0f0e8;
+          border: 1px solid #333; border-radius: 50%;
+          box-shadow: 0 4px 16px rgba(0,0,0,0.4);
           cursor: pointer; display: flex; align-items: center; justify-content: center;
-          font-size: 1rem; transition: all 0.15s; font-family: inherit;
+          font-size: 1rem; transition: all 0.2s; font-family: inherit;
         }
-        .fab-theme-btn:hover { transform: translate(-2px,-2px); box-shadow: 6px 6px 0px var(--border); }
-        .fab-theme-btn:active { transform: translate(2px,2px); box-shadow: none; }
+        .fab-btn:hover { transform: scale(1.1); }
 
-        .hero-section {
-          position: relative; overflow: hidden;
-          min-height: 92vh; display: flex; align-items: center;
+        /* ── HEADER ── */
+        .page-header { margin-bottom: 20px; }
+        .page-title {
+          font-size: 1.6rem; font-weight: 700;
+          color: var(--text); margin-bottom: 4px;
+          font-family: var(--font-body);
         }
-        .hero-video {
-          position: absolute; inset: 0;
+        .page-subtitle {
+          font-size: 0.88rem; color: var(--muted);
+          font-family: var(--font-body);
+        }
+
+        /* ── VIDEO BANNER ── */
+        .video-wrap {
+          position: relative;
+          width: 100%;
+          height: 180px;
+          border-radius: 16px;
+          overflow: hidden;
+          margin-bottom: 20px;
+          background: #111;
+        }
+        .banner-video {
           width: 100%; height: 100%;
-          object-fit: cover; z-index: 0;
-          opacity: 0.55; filter: grayscale(80%) contrast(1.1);
+          object-fit: cover;
+          filter: grayscale(60%) brightness(0.7);
         }
-        .hero-overlay {
-          position: absolute; inset: 0; z-index: 1;
-          background: linear-gradient(to bottom, transparent 20%, var(--bg) 100%);
+        .video-overlay {
+          position: absolute; inset: 0;
+          display: flex; align-items: center; justify-content: center;
+          background: linear-gradient(135deg, rgba(0,0,0,0.3), rgba(0,0,0,0.1));
         }
-        .hero-grid {
-          position: absolute; inset: 0; z-index: 2; pointer-events: none;
-          background-image:
-            linear-gradient(rgba(0,0,0,0.04) 1px, transparent 1px),
-            linear-gradient(90deg, rgba(0,0,0,0.04) 1px, transparent 1px);
-          background-size: 20px 20px;
-        }
-        .hero-content {
-          position: relative; z-index: 3;
-          text-align: center; padding: 6rem 1.5rem 4rem;
-        }
-        .hero-badge {
-          font-family: var(--font-mono); font-size: 0.58rem;
-          border: 2px solid var(--border); padding: 0.45rem 1rem;
-          color: var(--muted); letter-spacing: 3px; text-transform: uppercase;
-          background: var(--surface); box-shadow: var(--shadow);
-        }
-        .hero-title {
-          font-family: var(--font-display); font-weight: 900;
-          font-size: clamp(2.5rem, 10vw, 5rem);
-          letter-spacing: 8px; text-transform: uppercase;
-          color: var(--text); line-height: 1;
-          margin: 1.5rem 0 0.5rem;
-          text-shadow: 4px 4px 0px var(--border);
-        }
-        .hero-cursor { color: var(--muted); }
-        .hero-subtitle {
-          font-family: var(--font-mono); font-size: 0.58rem;
-          letter-spacing: 5px; text-transform: uppercase;
-          color: var(--muted); margin-bottom: 2rem;
-        }
-        .hero-desc {
-          font-family: var(--font-body); color: var(--muted);
-          font-size: 0.9rem; max-width: 380px;
-          margin: 0 auto 2.5rem; line-height: 1.9;
-        }
-        .hero-scroll-hint {
-          margin-top: 4rem; color: var(--muted);
-          font-family: var(--font-mono); font-size: 0.52rem;
-          letter-spacing: 3px; text-transform: uppercase; opacity: 0.6;
+        .video-label {
+          font-family: var(--font-display);
+          font-weight: 900;
+          font-size: 2.2rem;
+          letter-spacing: 8px;
+          text-transform: uppercase;
+          color: #fff;
+          text-shadow: 2px 2px 12px rgba(0,0,0,0.8);
         }
 
-        .features-grid {
+        /* ── STATS ── */
+        .stats-grid {
           display: grid;
-          grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-          gap: 6px;
+          grid-template-columns: 1fr 1fr;
+          gap: 12px;
+          margin-bottom: 28px;
         }
-        .feature-card {
-          display: block; background: var(--surface); padding: 1.75rem;
-          text-decoration: none; border: 2px solid var(--border);
-          box-shadow: var(--shadow); position: relative; transition: all 0.15s;
+        .stat-card {
+          background: #1c1c1e;
+          border-radius: 12px;
+          padding: 16px;
+          border: 1px solid #2a2a2a;
         }
-        .feature-card:hover { transform: translate(-2px,-2px); box-shadow: var(--shadow-lg); }
-        .feature-card:active { transform: translate(2px,2px); box-shadow: none; }
-        .feature-card--popular { border-color: var(--text); box-shadow: var(--shadow-lg); }
-        .popular-badge {
-          position: absolute; top: -2px; right: -2px;
-          background: var(--text); color: var(--bg);
-          font-family: var(--font-mono); font-size: 0.52rem;
-          padding: 0.2rem 0.6rem; letter-spacing: 2px; text-transform: uppercase;
+        .stat-top {
+          display: flex; align-items: center;
+          justify-content: space-between;
+          margin-bottom: 8px;
         }
-        .feature-card-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem; }
-        .feature-prefix { color: var(--muted); font-family: var(--font-display); font-size: 0.7rem; }
-        .feature-label {
-          font-family: var(--font-display); font-weight: 900;
-          font-size: 1rem; letter-spacing: 4px; text-transform: uppercase;
-          margin-bottom: 0.6rem; color: var(--text); line-height: 1.2;
+        .stat-label {
+          font-size: 0.78rem; color: #888;
+          font-family: var(--font-body);
         }
-        .feature-desc { font-family: var(--font-body); font-size: 0.82rem; color: var(--muted); line-height: 1.7; margin-bottom: 1rem; }
-        .feature-footer { display: flex; align-items: center; gap: 0.75rem; border-top: 1px solid var(--border); padding-top: 0.75rem; opacity: 0.8; }
-        .feature-stat { font-family: var(--font-mono); font-size: 0.7rem; color: var(--muted); display: flex; align-items: center; gap: 0.3rem; }
-        .feature-likes { font-family: var(--font-mono); font-size: 0.7rem; color: #c05050; display: flex; align-items: center; gap: 0.3rem; }
-        .feature-play { margin-left: auto; font-family: var(--font-mono); font-size: 0.52rem; color: var(--muted); letter-spacing: 2px; }
+        .stat-icon { color: #555; font-size: 0.9rem; }
+        .stat-value {
+          font-size: 2rem; font-weight: 700;
+          font-family: var(--font-body);
+          line-height: 1; margin-bottom: 4px;
+        }
+        .stat-value--sm { font-size: 1rem; line-height: 1.3; }
+        .stat-sub { font-size: 0.72rem; color: #666; font-family: var(--font-body); }
 
-        .qris-box { border: 2px solid var(--border); box-shadow: var(--shadow-lg); padding: 2.5rem 2rem; text-align: center; background: var(--surface); position: relative; }
-        .qris-label { position: absolute; top: -12px; left: 50%; transform: translateX(-50%); background: var(--surface); padding: 0 0.75rem; font-family: var(--font-mono); font-size: 0.52rem; color: var(--muted); letter-spacing: 3px; text-transform: uppercase; white-space: nowrap; }
-        .qris-title { font-family: var(--font-display); font-weight: 900; font-size: 1.6rem; letter-spacing: 5px; text-transform: uppercase; margin: 1rem 0 0.75rem; color: var(--text); }
-        .qris-desc { font-family: var(--font-body); font-size: 0.85rem; color: var(--muted); margin-bottom: 1.5rem; line-height: 1.8; }
-        .qris-img-wrap { display: inline-block; border: 2px solid var(--border); box-shadow: var(--shadow-lg); padding: 1rem; background: #fff; margin-bottom: 1rem; }
-        .qris-thanks { font-family: var(--font-mono); font-size: 0.52rem; color: var(--muted); letter-spacing: 3px; text-transform: uppercase; opacity: 0.7; }
+        /* ── CATEGORY ── */
+        .category-section { margin-bottom: 24px; }
+        .category-label {
+          font-size: 1.1rem; font-weight: 600;
+          color: var(--text); margin-bottom: 12px;
+          font-family: var(--font-body);
+        }
+        .tool-list { display: flex; flex-direction: column; gap: 10px; }
+
+        /* ── TOOL CARD ── */
+        .tool-card {
+          display: block;
+          background: #1c1c1e;
+          border-radius: 14px;
+          padding: 16px;
+          text-decoration: none;
+          border: 1px solid #2a2a2a;
+          position: relative;
+          transition: all 0.2s;
+          overflow: hidden;
+        }
+        .tool-card:hover { border-color: #444; transform: translateY(-1px); box-shadow: 0 8px 24px rgba(0,0,0,0.3); }
+        .tool-card--popular { border-color: #f59e0b; box-shadow: 0 0 0 1px #f59e0b22; }
+
+        .popular-ribbon {
+          position: absolute; top: 12px; right: -24px;
+          background: #f59e0b; color: #000;
+          font-size: 0.52rem; font-weight: 700;
+          padding: 3px 30px; transform: rotate(35deg);
+          letter-spacing: 1px;
+          font-family: var(--font-body);
+        }
+
+        .tool-card-top {
+          display: flex; align-items: center; gap: 14px;
+          margin-bottom: 14px;
+        }
+        .tool-icon-wrap {
+          width: 48px; height: 48px; border-radius: 12px;
+          display: flex; align-items: center; justify-content: center;
+          flex-shrink: 0;
+        }
+        .tool-info { flex: 1; min-width: 0; }
+        .tool-name {
+          font-size: 1rem; font-weight: 600;
+          color: var(--text); margin-bottom: 3px;
+          font-family: var(--font-body);
+        }
+        .tool-desc { font-size: 0.8rem; color: #888; font-family: var(--font-body); }
+
+        .tool-card-bottom {
+          display: flex; align-items: center; justify-content: space-between;
+        }
+        .like-btn {
+          background: none; border: none; cursor: pointer;
+          color: #555; font-size: 1rem; padding: 4px;
+          transition: all 0.15s; line-height: 1;
+        }
+        .like-btn--active { color: #f472b6; }
+        .like-btn:hover { color: #f472b6; transform: scale(1.2); }
+
+        .tool-stats { display: flex; align-items: center; gap: 12px; }
+        .tool-stat {
+          font-size: 0.75rem; color: #666;
+          display: flex; align-items: center; gap: 4px;
+          font-family: var(--font-body);
+          background: #252525; padding: 4px 10px; border-radius: 20px;
+        }
+        .tool-stat i { font-size: 0.65rem; }
+
+        /* ── QRIS ── */
+        .qris-section { margin-top: 32px; margin-bottom: 24px; }
+        .qris-box {
+          background: #1c1c1e; border-radius: 16px;
+          border: 1px solid #2a2a2a; padding: 28px 20px;
+          text-align: center; position: relative;
+        }
+        .qris-top-label {
+          position: absolute; top: -11px; left: 50%;
+          transform: translateX(-50%);
+          background: #1c1c1e; padding: 0 12px;
+          font-size: 0.6rem; color: #666; letter-spacing: 3px;
+          font-family: var(--font-mono); white-space: nowrap;
+        }
+        .qris-title {
+          font-family: var(--font-display); font-weight: 900;
+          font-size: 1.4rem; letter-spacing: 4px;
+          color: var(--text); margin-bottom: 8px;
+        }
+        .qris-desc { font-size: 0.85rem; color: #888; margin-bottom: 20px; font-family: var(--font-body); }
+        .qris-img-wrap {
+          display: inline-block; background: #fff;
+          padding: 12px; border-radius: 12px; margin-bottom: 14px;
+        }
+        .qris-img-wrap img { display: block; border-radius: 4px; }
+        .qris-thanks { font-size: 0.6rem; color: #555; letter-spacing: 3px; font-family: var(--font-mono); }
+
+        /* ── RESPONSIVE ── */
+        @media (max-width: 400px) {
+          .stats-grid { gap: 8px; }
+          .stat-value { font-size: 1.6rem; }
+          .video-wrap { height: 140px; }
+          .video-label { font-size: 1.6rem; }
+        }
       `}</style>
     </Layout>
   );
