@@ -1,6 +1,7 @@
 // pages/download/index.js
 import Head from 'next/head';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useRouter } from 'next/router';
 import Layout from '../../components/Layout';
 import TikTokDownloader from '../../components/downloader/TikTokDownloader';
 import InstagramDownloader from '../../components/downloader/InstagramDownloader';
@@ -16,7 +17,17 @@ const tabs = [
 ];
 
 export default function DownloadPage() {
+  const router = useRouter();
   const [activeTab, setActiveTab] = useState('tiktok');
+
+  // Baca ?tab= dari URL, set activeTab sesuai
+  useEffect(() => {
+    if (!router.isReady) return;
+    const tab = router.query.tab;
+    if (tab && tabs.find(t => t.id === tab)) {
+      setActiveTab(tab);
+    }
+  }, [router.isReady, router.query.tab]);
 
   return (
     <Layout>
