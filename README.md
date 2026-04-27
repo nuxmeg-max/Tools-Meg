@@ -12,7 +12,8 @@ Meg adalah kumpulan tools gratis berbasis web yang dibangun dengan **Next.js** d
 |---|---|---|
 | TikTok Downloader | Video (no watermark / WM) + Extract Audio | fromscratch.web.id |
 | Instagram Downloader | Foto, Video, Reels, Carousel + Extract Audio | fromscratch.web.id |
-| YouTube Downloader | Multi-format video + audio-only | RapidAPI yt-dlp |
+| YouTube Downloader | Multi-format video + audio-only | fromscratch.web.id |
+| Spotify Downloader | audio-only | fromscratch.web.id |
 | Remove Background | Hapus BG foto otomatis dengan AI | remove.bg |
 | Text Styler | 14 gaya teks Unicode, real-time, copy 1 klik | Tidak perlu API |
 
