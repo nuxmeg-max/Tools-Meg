@@ -8,14 +8,12 @@ export default function Footer() {
       background: 'var(--bg)',
       transition: 'background 0.3s, color 0.3s',
     }}>
-      {/* Top dashed line */}
       <div style={{
         height: '1px',
         marginBottom: '1.5rem',
         background: 'repeating-linear-gradient(90deg, var(--border) 0px, var(--border) 4px, transparent 4px, transparent 9px)',
         opacity: 0.3,
       }} />
-
       <div className="container" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '1rem' }}>
         <span style={{
           fontFamily: 'var(--font-display)',
@@ -28,7 +26,6 @@ export default function Footer() {
         }}>
           MEG
         </span>
-
         <p style={{
           fontFamily: 'var(--font-mono)',
           fontSize: '0.56rem',
