@@ -17,28 +17,26 @@ export default async function handler(req, res) {
 
     if (!response.ok) throw new Error(`Server API merespons dengan status ${response.status}`);
     const data = await response.json();
-    console.log('[Instagram API Raw]', JSON.stringify(data).slice(0, 500));
 
-    if (data.status !== 200 && data.status !== true && data.status !== 'ok') {
+    if (data.status !== 200) {
       throw new Error(data.message || 'Tidak dapat memproses URL ini.');
     }
 
-    // Struktur baru: data.data.media.videos[] dan data.data.media.images[]
     const media = data.data?.media;
     if (!media) throw new Error('API tidak mengembalikan data media.');
 
-    const videos = media.videos || [];
-    const images = media.images || [];
+    const videos = (media.videos || []).filter(v => v);
+    const images = (media.images || []).filter(i => i);
 
-    // Gabungkan semua media
+    // videos dan images berisi string URL langsung
     const allItems = [
-      ...videos.map(v => ({ type: 'video', url: v.url || v, thumbnail: v.thumbnail || null })),
-      ...images.map(i => ({ type: 'image', url: i.url || i, thumbnail: null })),
+      ...videos.map(v => ({ type: 'video', url: typeof v === 'string' ? v : v.url, thumbnail: null })),
+      ...images.map(i => ({ type: 'image', url: typeof i === 'string' ? i : i.url, thumbnail: null })),
     ].filter(item => item.url);
 
     if (allItems.length === 0) throw new Error('Tidak ada media ditemukan.');
     if (allItems.length === 1) {
-      return res.status(200).json({ type: allItems[0].type, url: allItems[0].url, thumbnail: allItems[0].thumbnail, items: [] });
+      return res.status(200).json({ type: allItems[0].type, url: allItems[0].url, thumbnail: null, items: [] });
     }
     return res.status(200).json({ items: allItems });
 
@@ -46,4 +44,4 @@ export default async function handler(req, res) {
     console.error('[Instagram API Error]', err.message);
     return res.status(500).json({ error: err.message || 'Terjadi kesalahan server.' });
   }
-}
+        }
