@@ -17,27 +17,25 @@ export default async function handler(req, res) {
 
     if (!response.ok) throw new Error(`Server API merespons dengan status ${response.status}`);
     const data = await response.json();
-    console.log('[Spotify API Raw]', JSON.stringify(data).slice(0, 500));
 
-    if (data.status !== 200 && data.status !== true && data.status !== 'ok') {
+    if (data.status !== 200) {
       throw new Error(data.message || 'Tidak dapat memproses URL ini.');
     }
 
-    // Struktur baru: data.data.metadata + data.data.download_url
-    const d = data.data || {};
-    const metadata = d.metadata || {};
+    const metadata = data.data?.metadata || {};
+    const downloadUrl = data.data?.download_url || null;
 
     const result = {
-      title:    metadata.name     || metadata.title  || d.title  || '',
+      title:    metadata.name || '',
       artist:   Array.isArray(metadata.artists)
-                  ? metadata.artists.map(a => a.name || a).join(', ')
-                  : metadata.artists || metadata.artist || d.artist || '',
-      album:    metadata.album?.name || metadata.album || d.album || '',
-      cover:    metadata.images?.[0]?.url || metadata.cover || metadata.image || d.cover || d.thumbnail || '',
+                  ? metadata.artists.map(a => a.name).join(', ')
+                  : '',
+      album:    metadata.album?.name || '',
+      cover:    metadata.album?.images?.[0]?.url || '',
       duration: metadata.duration_ms
                   ? Math.floor(metadata.duration_ms / 1000) + 's'
-                  : metadata.duration || '',
-      audio:    d.download_url || d.audio || d.url || d.link || d.mp3 || d.download || null,
+                  : '',
+      audio:    downloadUrl,
     };
 
     if (!result.audio) throw new Error('API tidak mengembalikan URL audio. Coba URL lain.');
@@ -48,3 +46,4 @@ export default async function handler(req, res) {
     return res.status(500).json({ error: err.message || 'Terjadi kesalahan server.' });
   }
 }
+  
