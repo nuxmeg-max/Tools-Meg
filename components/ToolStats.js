@@ -1,7 +1,4 @@
 // components/ToolStats.js
-// Komponen like button + usage counter + popular badge
-// Dipakai di setiap halaman tool (download, remove-bg, text-styler)
-
 import { useState, useEffect } from 'react';
 
 export default function ToolStats({ toolId, onUse }) {
@@ -12,15 +9,12 @@ export default function ToolStats({ toolId, onUse }) {
   const [loading, setLoading]   = useState(true);
   const [likeAnim, setLikeAnim] = useState(false);
 
-  // Fetch stats saat mount
   useEffect(() => {
     fetchStats();
-    // Cek apakah user sudah like sebelumnya (simpan di localStorage)
-    const likedTools = JSON.parse(localStorage.getItem('meg-liked') || '[]');
-    setLiked(likedTools.includes(toolId));
+    const likedTools = JSON.parse(localStorage.getItem('meg-liked') || '{}');
+    setLiked(!!likedTools[toolId]);
   }, [toolId]);
 
-  // Track usage saat komponen mount (artinya user buka halaman tool ini)
   useEffect(() => {
     trackUsage();
   }, [toolId]);
@@ -35,7 +29,6 @@ export default function ToolStats({ toolId, onUse }) {
       }
       setPopular(data.popular === toolId);
     } catch {
-      // Gagal fetch — tampilkan 0
     } finally {
       setLoading(false);
     }
@@ -48,35 +41,34 @@ export default function ToolStats({ toolId, onUse }) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ tool: toolId, action: 'use' }),
       });
-    } catch { /* silent fail */ }
+    } catch {}
   };
 
   const handleLike = async () => {
     const newLiked = !liked;
     const action = newLiked ? 'like' : 'unlike';
 
-    // Optimistic UI update
     setLiked(newLiked);
     setLikes(prev => newLiked ? prev + 1 : Math.max(0, prev - 1));
     setLikeAnim(true);
     setTimeout(() => setLikeAnim(false), 400);
 
-    // Simpan ke localStorage
-    const likedTools = JSON.parse(localStorage.getItem('meg-liked') || '[]');
+    const likedTools = JSON.parse(localStorage.getItem('meg-liked') || '{}');
     if (newLiked) {
-      localStorage.setItem('meg-liked', JSON.stringify([...likedTools, toolId]));
+      localStorage.setItem('meg-liked', JSON.stringify({ ...likedTools, [toolId]: true }));
     } else {
-      localStorage.setItem('meg-liked', JSON.stringify(likedTools.filter(t => t !== toolId)));
+      const updated = { ...likedTools };
+      delete updated[toolId];
+      localStorage.setItem('meg-liked', JSON.stringify(updated));
     }
 
-    // Kirim ke server
     try {
       await fetch('/api/stats', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ tool: toolId, action }),
       });
-    } catch { /* silent fail */ }
+    } catch {}
   };
 
   const formatNumber = (n) => {
@@ -94,7 +86,6 @@ export default function ToolStats({ toolId, onUse }) {
       marginTop: '1.5rem',
       flexWrap: 'wrap',
     }}>
-      {/* Popular badge */}
       {popular && (
         <div style={{
           display: 'flex',
@@ -115,7 +106,6 @@ export default function ToolStats({ toolId, onUse }) {
         </div>
       )}
 
-      {/* Usage count */}
       <div style={{
         display: 'flex',
         alignItems: 'center',
@@ -128,10 +118,8 @@ export default function ToolStats({ toolId, onUse }) {
         {loading ? '...' : formatNumber(usage)} pengguna
       </div>
 
-      {/* Separator */}
       <span style={{ color: 'var(--gray-600)', fontSize: '0.7rem' }}>·</span>
 
-      {/* Like button */}
       <button
         onClick={handleLike}
         style={{
