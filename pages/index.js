@@ -10,11 +10,10 @@ const categories = [
   {
     label: 'Downloader',
     tools: [
-      { href: '/download', icon: 'fa-brands fa-tiktok',    iconColor: '#ee1d52', label: 'TikTok Downloader',    desc: 'Download media from TikTok without watermark', toolId: 'tiktok' },
-      { href: '/download', icon: 'fa-brands fa-youtube',   iconColor: '#ff0000', label: 'YouTube Downloader',   desc: 'Download media from YouTube',                  toolId: 'youtube' },
-      { href: '/download', icon: 'fa-brands fa-instagram', iconColor: '#e1306c', label: 'Instagram Downloader', desc: 'Download foto, video, reels & stories',         toolId: 'instagram' },
-      { href: '/download', icon: 'fa-brands fa-spotify',   iconColor: '#1db954', label: 'Spotify Downloader',   desc: 'Download lagu & playlist ke MP3',               toolId: 'spotify' },
-    ],
+      { href: '/download?tab=tiktok',    icon: 'fa-brands fa-tiktok',    iconColor: '#ee1d52', label: 'TikTok Downloader',    desc: 'Download media from TikTok without watermark', toolId: 'tiktok' },
+{ href: '/download?tab=youtube',   icon: 'fa-brands fa-youtube',   iconColor: '#ff0000', label: 'YouTube Downloader',   desc: 'Download media from YouTube',                  toolId: 'youtube' },
+{ href: '/download?tab=instagram', icon: 'fa-brands fa-instagram', iconColor: '#e1306c', label: 'Instagram Downloader', desc: 'Download foto, video, reels & stories',         toolId: 'instagram' },
+{ href: '/download?tab=spotify',   icon: 'fa-brands fa-spotify',   iconColor: '#1db954', label: 'Spotify Downloader',   desc: 'Download lagu & playlist ke MP3',               toolId: 'spotify' },    ],
   },
   {
     label: 'AI Tools',
