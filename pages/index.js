@@ -206,8 +206,8 @@ export default function Home() {
         {/* ── QRIS ── */}
         <div className="qris-section">
           <div className="qris-box">
-            <div className="qris-top-label">★ SUPPORT MEG ★</div>
-            <h2 className="qris-title">SUKA DENGAN MEG?</h2>
+            <div className="qris-top-label"> SUPPORT MEG </div>
+            <h2 className="qris-title">SUKA DENGAN WEBSITE INI?</h2>
             <p className="qris-desc">Semua tools gratis. Kalau terbantu, support via QRIS.</p>
             <div className="qris-img-wrap">
               <img src="/qris.png" alt="QRIS" width={200} height={200} />
