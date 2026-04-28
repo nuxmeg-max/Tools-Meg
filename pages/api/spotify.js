@@ -17,20 +17,18 @@ export default async function handler(req, res) {
 
     if (!response.ok) throw new Error(`Server API merespons dengan status ${response.status}`);
     const data = await response.json();
-
-    // Log response asli untuk debug
     console.log('[Spotify API Raw]', JSON.stringify(data).slice(0, 500));
 
     if (data.status !== 200 && data.status !== true && data.status !== 'ok') {
       throw new Error(data.message || 'Tidak dapat memproses URL ini.');
     }
 
-    // Struktur fromscratch: data.data.metadata + data.data.download_url / audio / link
-    const d        = data.data || data.result || data;
-    const metadata = d.metadata || d;
+    // Struktur baru: data.data.metadata + data.data.download_url
+    const d = data.data || {};
+    const metadata = d.metadata || {};
 
     const result = {
-      title:    metadata.name    || metadata.title  || d.title  || '',
+      title:    metadata.name     || metadata.title  || d.title  || '',
       artist:   Array.isArray(metadata.artists)
                   ? metadata.artists.map(a => a.name || a).join(', ')
                   : metadata.artists || metadata.artist || d.artist || '',
@@ -44,6 +42,7 @@ export default async function handler(req, res) {
 
     if (!result.audio) throw new Error('API tidak mengembalikan URL audio. Coba URL lain.');
     return res.status(200).json(result);
+
   } catch (err) {
     console.error('[Spotify API Error]', err.message);
     return res.status(500).json({ error: err.message || 'Terjadi kesalahan server.' });
