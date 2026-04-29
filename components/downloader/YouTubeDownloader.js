@@ -114,7 +114,7 @@ export default function YouTubeDownloader() {
       {/* Download button */}
       <button className="btn-primary" onClick={handleDownload} disabled={loading} style={{ width: '100%', marginBottom: '0.75rem' }}>
         {loading ? <span className="spinner" /> : <i className="fa-brands fa-youtube" />}
-        {loading ? 'Memproses...' : 'Ambil Info'}
+        {loading ? 'Memproses...' : 'Download'}
       </button>
 
       {/* Error */}
