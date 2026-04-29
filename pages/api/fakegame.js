@@ -88,19 +88,33 @@ export default async function handler(req, res) {
     }
 
     if (game === 'ml') {
-      if (!filePart || !filePart.data || filePart.data.length === 0) {
-        return res.status(400).json({ error: 'Upload foto hero terlebih dahulu.' });
-      }
+  if (!filePart || !filePart.data || filePart.data.length === 0) {
+    return res.status(400).json({ error: 'Upload foto hero terlebih dahulu.' });
+  }
 
-      const base64Img = filePart.data.toString('base64');
-      const mimeType = filePart.contentType || 'image/jpeg';
-      const imageDataUrl = `data:${mimeType};base64,${base64Img}`;
+  // Upload foto ke tmpfiles.org untuk dapat URL publik
+  const formData = new FormData();
+  const blob = new Blob([filePart.data], { type: filePart.contentType || 'image/jpeg' });
+  formData.append('file', blob, filePart.filename || 'hero.jpg');
 
-      const params = new URLSearchParams({ text, image: imageDataUrl });
-      const apiRes = await fetch(`https://api.skylow.web.id/api/maker/fakeml?${params}`);
-      const data = await handleApiResponse(apiRes);
-      return res.status(200).json(data);
-    }
+  const uploadRes = await fetch('https://tmpfiles.org/api/v1/upload', {
+    method: 'POST',
+    body: formData,
+  });
+
+  const uploadJson = await uploadRes.json();
+  // tmpfiles.org return: { status: 'success', data: { url: 'https://tmpfiles.org/...' } }
+  const tmpUrl = uploadJson?.data?.url;
+  if (!tmpUrl) return res.status(500).json({ error: 'Gagal upload foto ke server sementara.' });
+
+  // Convert URL tmpfiles ke direct link
+  const directUrl = tmpUrl.replace('tmpfiles.org/', 'tmpfiles.org/dl/');
+
+  const params = new URLSearchParams({ text, image: directUrl });
+  const apiRes = await fetch(`https://api.skylow.web.id/api/maker/fakeml?${params}`);
+  const data = await handleApiResponse(apiRes);
+  return res.status(200).json(data);
+}
 
     return res.status(400).json({ error: 'Game tidak dikenal.' });
   } catch (err) {
