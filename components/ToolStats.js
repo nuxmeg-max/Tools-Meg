@@ -11,8 +11,10 @@ export default function ToolStats({ toolId, onUse }) {
 
   useEffect(() => {
     fetchStats();
-    const likedTools = JSON.parse(localStorage.getItem('meg-liked') || '{}');
-    setLiked(!!likedTools[toolId]);
+    try {
+      const likedTools = JSON.parse(localStorage.getItem('meg-liked') || '{}');
+      setLiked(!!likedTools[toolId]);
+    } catch {}
   }, [toolId]);
 
   useEffect(() => {
@@ -53,14 +55,16 @@ export default function ToolStats({ toolId, onUse }) {
     setLikeAnim(true);
     setTimeout(() => setLikeAnim(false), 400);
 
-    const likedTools = JSON.parse(localStorage.getItem('meg-liked') || '{}');
-    if (newLiked) {
-      localStorage.setItem('meg-liked', JSON.stringify({ ...likedTools, [toolId]: true }));
-    } else {
-      const updated = { ...likedTools };
-      delete updated[toolId];
-      localStorage.setItem('meg-liked', JSON.stringify(updated));
-    }
+    try {
+      const likedTools = JSON.parse(localStorage.getItem('meg-liked') || '{}');
+      if (newLiked) {
+        localStorage.setItem('meg-liked', JSON.stringify({ ...likedTools, [toolId]: true }));
+      } else {
+        const updated = { ...likedTools };
+        delete updated[toolId];
+        localStorage.setItem('meg-liked', JSON.stringify(updated));
+      }
+    } catch {}
 
     try {
       await fetch('/api/stats', {
