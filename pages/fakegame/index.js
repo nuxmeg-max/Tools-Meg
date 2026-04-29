@@ -128,7 +128,7 @@ export default function FakeGamePage() {
             lineHeight: 1,
             marginBottom: '0.5rem',
           }}>
-            {tab === 'ff' ? '🔥 Fake Free Fire' : '⚔️ Fake Mobile Legends'}
+            {tab === 'ff' ? 'Fake Free Fire' : 'Fake Mobile Legends'}
           </h1>
           <p style={{ color: 'var(--muted)', fontFamily: 'var(--font-mono)', fontSize: '0.85rem' }}>
             {tab === 'ff'
@@ -196,11 +196,11 @@ export default function FakeGamePage() {
               marginBottom: '0.5rem',
               color: 'var(--muted)',
             }}>
-              {tab === 'ff' ? '★ NAMA PEMAIN' : '★ NAMA HERO'}
+              {tab === 'ff' ? 'NAMA Player' : 'NAMA Player'}
             </label>
             <input
               type="text"
-              placeholder={tab === 'ff' ? 'Contoh: ProGamer123' : 'Contoh: Kagura'}
+              placeholder={tab === 'ff' ? 'Masukin nama Player' : 'Masukin nama Player'}
               value={text}
               onChange={e => setText(e.target.value)}
               maxLength={32}
