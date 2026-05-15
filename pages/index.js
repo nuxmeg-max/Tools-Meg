@@ -27,6 +27,7 @@ const categories = [
       { href: '/text-styler', icon: 'fa-solid fa-font', iconColor: '#60a5fa', label: 'Text Styler', desc: 'Gaya teks Unicode untuk bio & caption', toolId: 'text-styler' },
       { href: '/fakegame?tab=ff', icon: 'fa-solid fa-fire', iconColor: '#ff6b2b', label: 'Fake Free Fire', desc: 'Buat profil palsu Free Fire', toolId: 'fakeff' },
     { href: '/fakegame?tab=ml', icon: 'fa-solid fa-dragon', iconColor: '#3b82f6', label: 'Fake Mobile Legends', desc: 'Buat profil palsu Mobile Legends', toolId: 'fakeml' },
+      { href: '/mirror', icon: 'fa-solid fa-left-right', iconColor: '#34d399', label: 'Mirror Image', desc: 'Ubah foto jadi efek mirror + iPhone frame', toolId: 'mirror' },
     ],
   },
 ];
