@@ -50,6 +50,27 @@ export default function EKTPPage() {
 
   const set = (k, v) => setForm(f => ({ ...f, [k]: v }));
 
+  // Fetch initial likes
+  useState(() => {
+    fetch('/api/stats')
+      .then(r => r.json())
+      .then(d => {
+        if (d?.stats?.ektp) setLikes(d.stats.ektp.likes || 0);
+      })
+      .catch(() => {});
+  });
+
+  const handleLike = () => {
+    const action = liked ? 'unlike' : 'like';
+    setLiked(!liked);
+    setLikes(l => liked ? Math.max(0, l - 1) : l + 1);
+    fetch('/api/stats', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ tool: 'ektp', action }),
+    }).catch(() => {});
+  };
+
   const handlePhoto = (f) => {
     if (!f) return;
     if (!f.type.startsWith('image/')) { setError('File foto harus berupa gambar.'); return; }
@@ -68,38 +89,55 @@ export default function EKTPPage() {
     setResult(null);
 
     try {
-      let photoUrl = 'https://i.imgur.com/default-pas.png'; // fallback
+      let photoUrl = '';
 
-      // Upload foto ke qu.ax kalau ada
+      // Upload foto lewat server (bukan langsung dari browser)
       if (photo) {
         setLoadMsg('Mengupload foto...');
         const fd = new FormData();
-        fd.append('files[]', photo);
-        const upRes = await fetch('https://qu.ax/upload.php', { method: 'POST', body: fd });
-        if (!upRes.ok) throw new Error('Gagal upload foto pas.');
+        fd.append('file', photo);
+        const upRes = await fetch('/api/ektp', { method: 'POST', body: fd });
         const upData = await upRes.json();
-        photoUrl = upData?.files?.[0]?.url || photoUrl;
+        if (!upRes.ok) throw new Error(upData.error || 'Gagal upload foto.');
+        photoUrl = upData.photo_url;
       }
 
       setLoadMsg('Membuat e-KTP...');
       const params = new URLSearchParams({
-        ...form,
-        pas_photo: photoUrl,
-        rt_rw: undefined,
-        kel_desa: undefined,
-        'rt/rw': form.rt_rw,
-        'kel/desa': form.kel_desa,
+        nik:            form.nik,
+        nama:           form.nama,
+        pas_photo:      photoUrl,
+        provinsi:       form.provinsi,
+        kota:           form.kota,
+        ttl:            form.ttl,
+        jenis_kelamin:  form.jenis_kelamin,
+        golongan_darah: form.golongan_darah,
+        alamat:         form.alamat,
+        rt_rw:          form.rt_rw,
+        kel_desa:       form.kel_desa,
+        kecamatan:      form.kecamatan,
+        agama:          form.agama,
+        status:         form.status,
+        pekerjaan:      form.pekerjaan,
+        kewarganegaraan:form.kewarganegaraan,
+        masa_berlaku:   form.masa_berlaku,
+        terbuat:        form.terbuat,
       });
-      // hapus key yg salah
-      params.delete('rt_rw');
-      params.delete('kel_desa');
 
-      const res = await fetch(`/api/ektp?${params}`);
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || 'Gagal generate KTP.');
+      const ktpRes = await fetch(`/api/ektp?${params}`);
+      const data = await ktpRes.json();
+      if (!ktpRes.ok) throw new Error(data.error || 'Gagal generate KTP.');
 
       const url = data.result_url || data.result || data.url || data.image;
       if (!url) throw new Error('Tidak ada hasil dari API.');
+
+      // Track usage
+      fetch('/api/stats', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ tool: 'ektp', action: 'use' }),
+      }).catch(() => {});
+
       setResult(url);
 
     } catch (err) {
@@ -328,6 +366,12 @@ export default function EKTPPage() {
                 <i className="fa-solid fa-download" /> Download
               </button>
             </div>
+            <div className="like-row">
+              <button className={`like-btn${liked ? ' like-btn--active' : ''}`} onClick={handleLike}>
+                <i className={`fa-${liked ? 'solid' : 'regular'} fa-heart`} />
+                <span>{likes}</span>
+              </button>
+            </div>
           </div>
         )}
 
@@ -416,6 +460,22 @@ export default function EKTPPage() {
         .action-row .btn-outline { flex: 1; justify-content: center; }
         .action-row .btn-primary { flex: 2; justify-content: center; }
 
+        .like-row {
+          display: flex;
+          justify-content: flex-end;
+          margin-top: 10px;
+        }
+        .like-btn {
+          display: flex; align-items: center; gap: 6px;
+          background: none; border: 1.5px solid var(--border);
+          color: var(--muted); padding: 6px 14px;
+          font-family: var(--font-mono); font-size: 0.75rem;
+          cursor: pointer; letter-spacing: 1px; transition: all 0.15s;
+        }
+        .like-btn:hover { border-color: #f87171; color: #f87171; }
+        .like-btn--active { border-color: #f87171; color: #f87171; }
+        .like-btn--active i { color: #f87171; }
+
         @media (max-width: 480px) {
           .form-grid { grid-template-columns: 1fr; }
           .action-row { flex-direction: column; }
@@ -424,5 +484,5 @@ export default function EKTPPage() {
       `}</style>
     </Layout>
   );
-  }
-                  
+                  }
+                             
