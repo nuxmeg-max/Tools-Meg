@@ -2,6 +2,7 @@
 import Head from 'next/head';
 import { useState, useRef } from 'react';
 import Layout from '../../components/Layout';
+import ToolStats from '../../components/ToolStats';
 
 const BLOOD_TYPES   = ['A', 'B', 'AB', 'O', '-'];
 const GENDERS       = ['LAKI-LAKI', 'PEREMPUAN'];
@@ -49,27 +50,6 @@ export default function EKTPPage() {
   const photoRef              = useRef(null);
 
   const set = (k, v) => setForm(f => ({ ...f, [k]: v }));
-
-  // Fetch initial likes
-  useState(() => {
-    fetch('/api/stats')
-      .then(r => r.json())
-      .then(d => {
-        if (d?.stats?.ektp) setLikes(d.stats.ektp.likes || 0);
-      })
-      .catch(() => {});
-  });
-
-  const handleLike = () => {
-    const action = liked ? 'unlike' : 'like';
-    setLiked(!liked);
-    setLikes(l => liked ? Math.max(0, l - 1) : l + 1);
-    fetch('/api/stats', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ tool: 'ektp', action }),
-    }).catch(() => {});
-  };
 
   const handlePhoto = (f) => {
     if (!f) return;
@@ -130,13 +110,6 @@ export default function EKTPPage() {
 
       const url = data.result_url || data.result || data.url || data.image;
       if (!url) throw new Error('Tidak ada hasil dari API.');
-
-      // Track usage
-      fetch('/api/stats', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ tool: 'ektp', action: 'use' }),
-      }).catch(() => {});
 
       setResult(url);
 
@@ -366,14 +339,10 @@ export default function EKTPPage() {
                 <i className="fa-solid fa-download" /> Download
               </button>
             </div>
-            <div className="like-row">
-              <button className={`like-btn${liked ? ' like-btn--active' : ''}`} onClick={handleLike}>
-                <i className={`fa-${liked ? 'solid' : 'regular'} fa-heart`} />
-                <span>{likes}</span>
-              </button>
-            </div>
           </div>
         )}
+
+      <ToolStats toolId="ektp" />
 
       </div>
 
@@ -460,22 +429,6 @@ export default function EKTPPage() {
         .action-row .btn-outline { flex: 1; justify-content: center; }
         .action-row .btn-primary { flex: 2; justify-content: center; }
 
-        .like-row {
-          display: flex;
-          justify-content: flex-end;
-          margin-top: 10px;
-        }
-        .like-btn {
-          display: flex; align-items: center; gap: 6px;
-          background: none; border: 1.5px solid var(--border);
-          color: var(--muted); padding: 6px 14px;
-          font-family: var(--font-mono); font-size: 0.75rem;
-          cursor: pointer; letter-spacing: 1px; transition: all 0.15s;
-        }
-        .like-btn:hover { border-color: #f87171; color: #f87171; }
-        .like-btn--active { border-color: #f87171; color: #f87171; }
-        .like-btn--active i { color: #f87171; }
-
         @media (max-width: 480px) {
           .form-grid { grid-template-columns: 1fr; }
           .action-row { flex-direction: column; }
@@ -485,4 +438,4 @@ export default function EKTPPage() {
     </Layout>
   );
                   }
-                             
+  
