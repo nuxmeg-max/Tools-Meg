@@ -29,6 +29,15 @@ const defaultForm = {
   terbuat: '',
 };
 
+function Field({ label, required, children }) {
+  return (
+    <div className="field">
+      <label className="field-label">{label}{required && <span className="req">*</span>}</label>
+      {children}
+    </div>
+  );
+}
+
 export default function EKTPPage() {
   const [form, setForm]       = useState(defaultForm);
   const [photo, setPhoto]     = useState(null);
@@ -110,13 +119,6 @@ export default function EKTPPage() {
       a.click();
     } catch {}
   };
-
-  const Field = ({ label, required, children }) => (
-    <div className="field">
-      <label className="field-label">{label}{required && <span className="req">*</span>}</label>
-      {children}
-    </div>
-  );
 
   return (
     <Layout>
@@ -422,5 +424,5 @@ export default function EKTPPage() {
       `}</style>
     </Layout>
   );
-}
-
+  }
+                  
