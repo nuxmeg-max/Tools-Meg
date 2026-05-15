@@ -8,6 +8,7 @@ const navLinks = [
   { href: '/remove-bg',   label: 'Remove BG',   icon: 'fa-solid fa-wand-magic-sparkles' },
   { href: '/text-styler', label: 'Text Styler', icon: 'fa-solid fa-font' },
   { href: '/mirror', label: 'Mirror', icon: 'fa-solid fa-left-right' },
+  { href: '/ektp', label: 'e-KTP', icon: 'fa-solid fa-id-card' },
 ];
 
 export default function Navbar() {
