@@ -342,7 +342,13 @@ export default function EKTPPage() {
           </div>
         )}
 
-      <ToolStats toolId="ektp" />
+      <div style={{
+        '--gray-400': 'var(--muted)',
+        '--gray-600': 'var(--border)',
+        '--white': 'var(--text)',
+      }}>
+        <ToolStats toolId="ektp" />
+      </div>
 
       </div>
 
@@ -437,5 +443,4 @@ export default function EKTPPage() {
       `}</style>
     </Layout>
   );
-                  }
-  
+}
