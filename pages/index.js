@@ -26,8 +26,8 @@ const categories = [
     tools: [
       { href: '/text-styler', icon: 'fa-solid fa-font', iconColor: '#60a5fa', label: 'Text Styler', desc: 'Gaya teks Unicode untuk bio & caption', toolId: 'text-styler' },
       { href: '/fakegame?tab=ff', icon: 'fa-solid fa-fire', iconColor: '#ff6b2b', label: 'Fake Free Fire', desc: 'Buat profil palsu Free Fire', toolId: 'fakeff' },
-    { href: '/fakegame?tab=ml', icon: 'fa-solid fa-dragon', iconColor: '#3b82f6', label: 'Fake Mobile Legends', desc: 'Buat profil palsu Mobile Legends', toolId: 'fakeml' },
-      { href: '/mirror', icon: 'fa-solid fa-left-right', iconColor: '#34d399', label: 'Mirror Image', desc: 'Ubah foto jadi efek mirror + iPhone frame', toolId: 'mirror' },
+      { href: '/fakegame?tab=ml', icon: 'fa-solid fa-dragon', iconColor: '#3b82f6', label: 'Fake Mobile Legends', desc: 'Buat profil palsu Mobile Legends', toolId: 'fakeml' },
+      { href: null, icon: 'fa-solid fa-left-right', iconColor: '#34d399', label: 'Mirror Image', desc: 'Ubah foto jadi efek mirror + iPhone frame', toolId: 'mirror', disabled: true },
     ],
   },
 ];
@@ -164,30 +164,39 @@ export default function Home() {
                 const s = stats[tool.toolId];
                 const isPopular = popular === tool.toolId;
                 const isLiked = liked[tool.toolId];
+                const cardClass = `tool-card${isPopular ? ' tool-card--popular' : ''}${tool.disabled ? ' tool-card--disabled' : ''}`;
+                const CardEl = tool.disabled ? 'div' : Link;
+                const cardProps = tool.disabled ? { className: cardClass } : { href: tool.href, className: cardClass };
                 return (
-                  <Link key={tool.toolId} href={tool.href} className={`tool-card${isPopular ? ' tool-card--popular' : ''}`}>
+                  <CardEl key={tool.toolId} {...cardProps}>
                     {isPopular && <div className="popular-ribbon">POPULAR</div>}
+                    {tool.disabled && <div className="soon-ribbon">SOON</div>}
 
                     <div className="tool-card-top">
-                      <div className="tool-icon-wrap" style={{ background: tool.iconColor + '22' }}>
-                        <i className={tool.icon} style={{ color: tool.iconColor, fontSize: '1.3rem' }} />
+                      <div className="tool-icon-wrap" style={{ background: tool.iconColor + (tool.disabled ? '11' : '22') }}>
+                        <i className={tool.icon} style={{ color: tool.iconColor, fontSize: '1.3rem', opacity: tool.disabled ? 0.4 : 1 }} />
                       </div>
                       <div className="tool-info">
-                        <div className="tool-name">{tool.label}</div>
-                        <div className="tool-desc">{tool.desc}</div>
+                        <div className="tool-name" style={{ opacity: tool.disabled ? 0.5 : 1 }}>{tool.label}</div>
+                        <div className="tool-desc" style={{ opacity: tool.disabled ? 0.4 : 1 }}>{tool.desc}</div>
                       </div>
                     </div>
 
                     <div className="tool-card-bottom">
                       <button
                         className={`like-btn${isLiked ? ' like-btn--active' : ''}`}
-                        onClick={(e) => handleLike(tool.toolId, e)}
+                        onClick={(e) => !tool.disabled && handleLike(tool.toolId, e)}
                         aria-label="Like"
+                        disabled={tool.disabled}
                       >
                         <i className={`fa-${isLiked ? 'solid' : 'regular'} fa-heart`} />
                       </button>
                       <div className="tool-stats">
-                        {s && (
+                        {tool.disabled ? (
+                          <span className="tool-stat" style={{ opacity: 0.4 }}>
+                            <i className="fa-solid fa-clock" /> Coming soon
+                          </span>
+                        ) : s && (
                           <>
                             <span className="tool-stat">
                               <i className="fa-solid fa-users" /> {fmt(s.usage)}
@@ -199,7 +208,7 @@ export default function Home() {
                         )}
                       </div>
                     </div>
-                  </Link>
+                  </CardEl>
                 );
               })}
             </div>
@@ -322,7 +331,16 @@ export default function Home() {
   }
   .tool-card:hover { border-color: var(--muted); transform: translateY(-1px); box-shadow: 0 8px 24px rgba(0,0,0,0.1); }
   .tool-card--popular { border-color: #f59e0b; box-shadow: 0 0 0 1px rgba(245,158,11,0.2); }
+  .tool-card--disabled { cursor: not-allowed; opacity: 0.75; }
+  .tool-card--disabled:hover { border-color: var(--border); transform: none; box-shadow: none; }
 
+  .soon-ribbon {
+    position: absolute; top: 12px; right: -24px;
+    background: var(--muted); color: var(--bg);
+    font-size: 0.52rem; font-weight: 700;
+    padding: 3px 30px; transform: rotate(35deg);
+    letter-spacing: 1px; font-family: var(--font-body);
+  }
   .popular-ribbon {
     position: absolute; top: 12px; right: -24px;
     background: #f59e0b; color: #000;
@@ -404,4 +422,5 @@ export default function Home() {
 `}</style>
     </Layout>
   );
-}
+          }
+          
