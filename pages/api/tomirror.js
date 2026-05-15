@@ -1,5 +1,6 @@
 // pages/api/tomirror.js
-// Alur: upload file → qu.ax (dapat URL publik) → api-faa.my.id/faa/tomirror
+// Hanya upload foto ke qu.ax, dapat URL publik
+// api-faa dipanggil langsung dari browser (frontend) agar tidak kena 403
 
 export const config = {
   api: {
@@ -50,23 +51,6 @@ async function parseFormData(req) {
   });
 }
 
-async function uploadToQuax(buffer, filename, contentType) {
-  const form = new FormData();
-  const blob = new Blob([buffer], { type: contentType });
-  form.append('files[]', blob, filename);
-
-  const res = await fetch('https://qu.ax/upload.php', {
-    method: 'POST',
-    body: form,
-  });
-
-  if (!res.ok) throw new Error('Gagal upload ke qu.ax');
-  const data = await res.json();
-  const url = data?.files?.[0]?.url;
-  if (!url) throw new Error('URL tidak ditemukan dari qu.ax');
-  return url;
-}
-
 export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
@@ -78,39 +62,27 @@ export default async function handler(req, res) {
       return res.status(400).json({ error: 'File tidak ditemukan dalam request.' });
     }
 
-    // Step 1: Upload ke qu.ax untuk dapat URL publik
-    const imageUrl = await uploadToQuax(
-      filePart.data,
-      filePart.filename || 'image.jpg',
-      filePart.contentType || 'image/jpeg'
-    );
+    // Upload ke qu.ax untuk dapat URL publik
+    const form = new FormData();
+    const blob = new Blob([filePart.data], { type: filePart.contentType || 'image/jpeg' });
+    form.append('files[]', blob, filePart.filename || 'image.jpg');
 
-    // Step 2: Kirim URL ke api-faa tomirror
-    const apiUrl = `https://api-faa.my.id/faa/tomirror?url=${encodeURIComponent(imageUrl)}`;
-    const apiRes = await fetch(apiUrl);
+    const uploadRes = await fetch('https://qu.ax/upload.php', {
+      method: 'POST',
+      body: form,
+    });
 
-    if (!apiRes.ok) {
-      throw new Error(`api-faa error: ${apiRes.status}`);
-    }
+    if (!uploadRes.ok) throw new Error('Gagal upload ke qu.ax');
+    const uploadData = await uploadRes.json();
+    const imageUrl = uploadData?.files?.[0]?.url;
+    if (!imageUrl) throw new Error('URL tidak ditemukan dari qu.ax');
 
-    const contentType = apiRes.headers.get('content-type') || '';
-
-    // Kalau response berupa JSON (ada result URL)
-    if (contentType.includes('application/json')) {
-      const data = await apiRes.json();
-      return res.status(200).json({ result_url: data.result || data.url || data.image, source_url: imageUrl });
-    }
-
-    // Kalau response berupa binary image langsung
-    const buffer = await apiRes.arrayBuffer();
-    const base64 = Buffer.from(buffer).toString('base64');
-    const mime = contentType.split(';')[0] || 'image/jpeg';
-    const dataUrl = `data:${mime};base64,${base64}`;
-
-    return res.status(200).json({ result_url: dataUrl, source_url: imageUrl });
+    // Kembalikan URL ke frontend — api-faa dipanggil dari browser
+    return res.status(200).json({ image_url: imageUrl });
 
   } catch (err) {
-    console.error('[ToMirror Error]', err.message);
+    console.error('[ToMirror Upload Error]', err.message);
     return res.status(500).json({ error: err.message || 'Terjadi kesalahan server.' });
   }
-}
+    }
+  
