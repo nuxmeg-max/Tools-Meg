@@ -4,13 +4,14 @@ import { useState, useRef } from 'react';
 import Layout from '../../components/Layout';
 
 export default function MirrorPage() {
-  const [file, setFile]           = useState(null);
-  const [preview, setPreview]     = useState(null);
-  const [result, setResult]       = useState(null);
-  const [loading, setLoading]     = useState(false);
-  const [error, setError]         = useState('');
-  const [dragging, setDragging]   = useState(false);
-  const inputRef                  = useRef(null);
+  const [file, setFile]         = useState(null);
+  const [preview, setPreview]   = useState(null);
+  const [result, setResult]     = useState(null);
+  const [loading, setLoading]   = useState(false);
+  const [loadingMsg, setLoadingMsg] = useState('');
+  const [error, setError]       = useState('');
+  const [dragging, setDragging] = useState(false);
+  const inputRef                = useRef(null);
 
   const handleFile = (f) => {
     if (!f) return;
@@ -41,27 +42,62 @@ export default function MirrorPage() {
     setResult(null);
 
     try {
+      // Step 1: Upload ke server → qu.ax
+      setLoadingMsg('Mengupload foto...');
       const form = new FormData();
       form.append('file', file);
+      const uploadRes = await fetch('/api/tomirror', { method: 'POST', body: form });
+      const uploadData = await uploadRes.json();
+      if (!uploadRes.ok) throw new Error(uploadData.error || 'Gagal upload foto.');
 
-      const res = await fetch('/api/tomirror', { method: 'POST', body: form });
-      const data = await res.json();
+      const imageUrl = uploadData.image_url;
 
-      if (!res.ok) throw new Error(data.error || 'Terjadi kesalahan.');
-      setResult(data.result_url);
+      // Step 2: Panggil api-faa langsung dari browser
+      setLoadingMsg('Memproses efek mirror...');
+      const apiUrl = `https://api-faa.my.id/faa/tomirror?url=${encodeURIComponent(imageUrl)}`;
+      const mirrorRes = await fetch(apiUrl);
+
+      if (!mirrorRes.ok) throw new Error(`api-faa error: ${mirrorRes.status}`);
+
+      const contentType = mirrorRes.headers.get('content-type') || '';
+
+      if (contentType.includes('application/json')) {
+        const data = await mirrorRes.json();
+        const url = data.result || data.url || data.image || data.data;
+        if (!url) throw new Error('Tidak ada URL hasil dari api-faa.');
+        setResult(url);
+      } else {
+        // Response binary image
+        const blob = await mirrorRes.blob();
+        setResult(URL.createObjectURL(blob));
+      }
+
     } catch (err) {
       setError(err.message);
     } finally {
       setLoading(false);
+      setLoadingMsg('');
     }
   };
 
-  const handleDownload = () => {
+  const handleDownload = async () => {
     if (!result) return;
-    const a = document.createElement('a');
-    a.href = result;
-    a.download = 'mirror-meg.jpg';
-    a.click();
+    try {
+      const res = await fetch(result);
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'mirror-meg.jpg';
+      a.click();
+      URL.revokeObjectURL(url);
+    } catch {
+      const a = document.createElement('a');
+      a.href = result;
+      a.download = 'mirror-meg.jpg';
+      a.target = '_blank';
+      a.click();
+    }
   };
 
   const handleReset = () => {
@@ -113,7 +149,7 @@ export default function MirrorPage() {
         )}
 
         {/* Preview + Action */}
-        {preview && !result && (
+        {preview && !result && !loading && (
           <div className="preview-section">
             <div className="card-title">
               <i className="fa-solid fa-image" /> PREVIEW
@@ -125,17 +161,18 @@ export default function MirrorPage() {
               <button className="btn-outline" onClick={handleReset}>
                 <i className="fa-solid fa-rotate-left" /> Ganti Foto
               </button>
-              <button
-                className="btn-primary"
-                onClick={handleSubmit}
-                disabled={loading}
-              >
-                {loading
-                  ? <><span className="spinner" /> Memproses...</>
-                  : <><i className="fa-solid fa-left-right" /> Buat Mirror</>
-                }
+              <button className="btn-primary" onClick={handleSubmit}>
+                <i className="fa-solid fa-left-right" /> Buat Mirror
               </button>
             </div>
+          </div>
+        )}
+
+        {/* Loading */}
+        {loading && (
+          <div className="loading-box">
+            <span className="spinner" />
+            <span>{loadingMsg || 'Memproses...'}</span>
           </div>
         )}
 
@@ -143,14 +180,11 @@ export default function MirrorPage() {
         {error && (
           <div className="alert alert-error">
             <i className="fa-solid fa-circle-exclamation" /> {error}
-          </div>
-        )}
-
-        {/* Loading state */}
-        {loading && (
-          <div className="loading-box">
-            <span className="spinner" />
-            <span>Sedang memproses gambar... mohon tunggu</span>
+            {preview && (
+              <button className="retry-btn" onClick={handleSubmit}>
+                <i className="fa-solid fa-rotate-right" /> Coba Lagi
+              </button>
+            )}
           </div>
         )}
 
@@ -196,179 +230,83 @@ export default function MirrorPage() {
           padding: 80px 16px 60px;
           min-height: 100vh;
         }
-
         .page-header { margin-bottom: 24px; }
-
         .page-badge {
-          display: inline-flex;
-          align-items: center;
-          gap: 6px;
-          padding: 4px 10px;
-          border: 1.5px solid var(--border);
-          font-family: var(--font-mono);
-          font-size: 0.6rem;
-          letter-spacing: 3px;
-          color: var(--muted);
-          text-transform: uppercase;
-          margin-bottom: 10px;
+          display: inline-flex; align-items: center; gap: 6px;
+          padding: 4px 10px; border: 1.5px solid var(--border);
+          font-family: var(--font-mono); font-size: 0.6rem;
+          letter-spacing: 3px; color: var(--muted);
+          text-transform: uppercase; margin-bottom: 10px;
         }
         .page-badge i { font-size: 0.55rem; }
-
         .page-title {
           font-size: 1.6rem; font-weight: 700;
           color: var(--text); margin-bottom: 4px;
           font-family: var(--font-body);
         }
-        .page-subtitle {
-          font-size: 0.85rem; color: var(--muted);
-          font-family: var(--font-body);
-        }
+        .page-subtitle { font-size: 0.85rem; color: var(--muted); font-family: var(--font-body); }
 
-        /* Drop Zone */
         .drop-zone {
-          border: 2px dashed var(--border);
-          border-radius: 0;
-          padding: 48px 24px;
-          text-align: center;
-          cursor: pointer;
-          transition: all 0.15s;
-          background: var(--surface);
-          box-shadow: var(--shadow);
-          margin-bottom: 16px;
+          border: 2px dashed var(--border); padding: 48px 24px;
+          text-align: center; cursor: pointer; transition: all 0.15s;
+          background: var(--surface); box-shadow: var(--shadow); margin-bottom: 16px;
         }
         .drop-zone:hover, .drop-zone--active {
-          border-style: solid;
-          border-color: var(--text);
-          transform: translate(-2px, -2px);
-          box-shadow: var(--shadow-lg);
+          border-style: solid; border-color: var(--text);
+          transform: translate(-2px, -2px); box-shadow: var(--shadow-lg);
         }
-        .drop-icon {
-          font-size: 2.4rem;
-          color: var(--muted);
-          margin-bottom: 12px;
-          opacity: 0.6;
-        }
+        .drop-icon { font-size: 2.4rem; color: var(--muted); margin-bottom: 12px; opacity: 0.6; }
         .drop-title {
-          font-family: var(--font-display);
-          font-size: 1rem; font-weight: 700;
-          letter-spacing: 2px; text-transform: uppercase;
-          color: var(--text); margin-bottom: 6px;
+          font-family: var(--font-display); font-size: 1rem; font-weight: 700;
+          letter-spacing: 2px; text-transform: uppercase; color: var(--text); margin-bottom: 6px;
         }
-        .drop-sub {
-          font-family: var(--font-mono);
-          font-size: 0.72rem; color: var(--muted);
-          letter-spacing: 1px;
-        }
+        .drop-sub { font-family: var(--font-mono); font-size: 0.72rem; color: var(--muted); letter-spacing: 1px; }
 
-        /* Preview */
-        .preview-section {
-          background: var(--surface);
-          border: 2px solid var(--border);
-          box-shadow: var(--shadow);
-          padding: 16px;
-          margin-bottom: 16px;
+        .preview-section, .result-section {
+          background: var(--surface); border: 2px solid var(--border);
+          box-shadow: var(--shadow); padding: 16px; margin-bottom: 16px;
         }
-        .preview-wrap {
-          width: 100%;
-          max-height: 400px;
-          overflow: hidden;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          background: var(--bg2);
-          margin-bottom: 16px;
+        .preview-wrap, .result-img-wrap {
+          width: 100%; display: flex; align-items: center; justify-content: center;
+          background: var(--bg2); margin-bottom: 16px; padding: 12px;
         }
-        .preview-img {
-          max-width: 100%;
-          max-height: 400px;
-          object-fit: contain;
-          display: block;
-        }
+        .preview-img, .result-img { max-width: 100%; object-fit: contain; display: block; }
 
-        /* Action Row */
-        .action-row {
-          display: flex;
-          gap: 10px;
-        }
+        .action-row { display: flex; gap: 10px; }
         .action-row .btn-outline { flex: 1; justify-content: center; }
         .action-row .btn-primary { flex: 2; justify-content: center; }
 
-        /* Loading */
         .loading-box {
-          display: flex;
-          align-items: center;
-          gap: 12px;
-          padding: 16px;
-          border: 2px solid var(--border);
-          background: var(--surface);
-          font-family: var(--font-mono);
-          font-size: 0.78rem;
-          color: var(--muted);
-          letter-spacing: 1px;
-          margin-bottom: 16px;
-          box-shadow: var(--shadow);
+          display: flex; align-items: center; gap: 12px; padding: 16px;
+          border: 2px solid var(--border); background: var(--surface);
+          font-family: var(--font-mono); font-size: 0.78rem; color: var(--muted);
+          letter-spacing: 1px; margin-bottom: 16px; box-shadow: var(--shadow);
         }
 
-        /* Result */
-        .result-section {
-          background: var(--surface);
-          border: 2px solid var(--border);
-          box-shadow: var(--shadow);
-          padding: 16px;
-          margin-bottom: 16px;
-        }
-        .result-img-wrap {
-          width: 100%;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          background: var(--bg2);
-          margin-bottom: 16px;
-          padding: 12px;
-        }
-        .result-img {
-          max-width: 100%;
-          object-fit: contain;
-          display: block;
+        .retry-btn {
+          display: inline-flex; align-items: center; gap: 6px;
+          margin-top: 8px; background: none; border: 1px solid currentColor;
+          color: inherit; padding: 4px 10px; font-size: 0.72rem;
+          font-family: var(--font-mono); cursor: pointer; letter-spacing: 1px;
         }
 
-        /* Info */
         .info-box {
-          background: var(--surface);
-          border: 2px solid var(--border);
-          box-shadow: var(--shadow);
-          padding: 16px;
-          margin-top: 8px;
+          background: var(--surface); border: 2px solid var(--border);
+          box-shadow: var(--shadow); padding: 16px; margin-top: 8px;
         }
-        .info-list {
-          list-style: none;
-          display: flex;
-          flex-direction: column;
-          gap: 8px;
-          padding: 0;
-        }
+        .info-list { list-style: none; display: flex; flex-direction: column; gap: 8px; padding: 0; }
         .info-list li {
-          display: flex;
-          align-items: center;
-          gap: 8px;
-          font-family: var(--font-body);
-          font-size: 0.82rem;
-          color: var(--muted);
+          display: flex; align-items: center; gap: 8px;
+          font-family: var(--font-body); font-size: 0.82rem; color: var(--muted);
         }
-        .info-list li i {
-          font-size: 0.65rem;
-          color: var(--text);
-          opacity: 0.6;
-          flex-shrink: 0;
-        }
+        .info-list li i { font-size: 0.65rem; color: var(--text); opacity: 0.6; flex-shrink: 0; }
 
         @media (max-width: 400px) {
           .action-row { flex-direction: column; }
-          .action-row .btn-outline,
-          .action-row .btn-primary { flex: unset; }
+          .action-row .btn-outline, .action-row .btn-primary { flex: unset; }
         }
       `}</style>
     </Layout>
   );
-    }
-              
+          }
+          
