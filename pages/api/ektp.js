@@ -59,11 +59,17 @@ export default async function handler(req, res) {
       const blob = new Blob([filePart.data], { type: filePart.contentType || 'image/jpeg' });
       form.append('files[]', blob, filePart.filename || 'photo.jpg');
 
-      const upRes = await fetch('https://qu.ax/upload.php', { method: 'POST', body: form });
-      if (!upRes.ok) throw new Error('Gagal upload ke qu.ax');
+      const upRes = await fetch('https://uguu.se/upload.php', {
+        method: 'POST',
+        body: form,
+        headers: {
+          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/90.0.4430.212 Safari/537.36',
+        },
+      });
+      if (!upRes.ok) throw new Error('Gagal upload ke uguu.se');
       const upData = await upRes.json();
       const url = upData?.files?.[0]?.url;
-      if (!url) throw new Error('URL tidak ditemukan dari qu.ax');
+      if (!url) throw new Error('URL tidak ditemukan dari uguu.se');
 
       return res.status(200).json({ photo_url: url });
     } catch (err) {
@@ -125,4 +131,5 @@ export default async function handler(req, res) {
   }
 
   return res.status(405).json({ error: 'Method not allowed' });
-}
+      }
+      
