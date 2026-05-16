@@ -108,7 +108,12 @@ export default async function handler(req, res) {
     });
 
     try {
-      const apiRes = await fetch(`https://api.skylow.web.id/api/maker/ektp?${params}`);
+      const apiRes = await fetch(`https://api.skylow.web.id/api/maker/ektp?${params}`, {
+        headers: {
+          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/90.0.4430.212 Safari/537.36',
+          'Accept': 'image/*',
+        },
+      });
       if (!apiRes.ok) throw new Error(`Skylow API error: ${apiRes.status}`);
 
       const contentType = apiRes.headers.get('content-type') || '';
@@ -131,5 +136,4 @@ export default async function handler(req, res) {
   }
 
   return res.status(405).json({ error: 'Method not allowed' });
-      }
-      
+    }
