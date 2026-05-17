@@ -24,7 +24,9 @@ const defaultForm = {
 function Field({ label, required, children }) {
   return (
     <div className="field">
-      <label className="field-label">{label}{required && <span className="req">*</span>}</label>
+      <label className="field-label">
+        {label}{required && <span className="req">*</span>}
+      </label>
       {children}
     </div>
   );
@@ -39,7 +41,7 @@ export default function EKTPPage() {
   const [error, setError]           = useState('');
   const [sigDrawing, setSigDrawing] = useState(false);
   const [hasSig, setHasSig]         = useState(false);
-  const [activeTab, setActiveTab]   = useState('data'); // 'data' | 'foto' | 'ttd'
+  const [activeTab, setActiveTab]   = useState('data');
 
   const photoRef  = useRef(null);
   const sigRef    = useRef(null);
@@ -48,7 +50,6 @@ export default function EKTPPage() {
 
   const set = (k, v) => setForm(f => ({ ...f, [k]: v }));
 
-  // Init signature canvas
   useEffect(() => {
     if (activeTab === 'ttd' && sigRef.current) {
       const canvas = sigRef.current;
@@ -77,8 +78,8 @@ export default function EKTPPage() {
   const sigMove = (e) => {
     e.preventDefault();
     if (!sigDrawing) return;
-    const ctx  = sigCtxRef.current;
-    const pos  = getPos(e, sigRef.current);
+    const ctx = sigCtxRef.current;
+    const pos = getPos(e, sigRef.current);
     ctx.beginPath();
     ctx.moveTo(lastPos.current.x, lastPos.current.y);
     ctx.lineTo(pos.x, pos.y);
@@ -95,125 +96,106 @@ export default function EKTPPage() {
 
   const handlePhoto = (f) => {
     if (!f) return;
-    if (!f.type.startsWith('image/')) { setError('File foto harus berupa gambar.'); return; }
+    if (!f.type.startsWith('image/')) {
+      setError('File foto harus berupa gambar.');
+      return;
+    }
     setError('');
     setPhoto(f);
     setPhotoPreview(URL.createObjectURL(f));
   };
 
   const generateKTP = async () => {
-    if (!form.nik || !form.nama) { setError('NIK dan Nama wajib diisi.'); return; }
-    setLoading(true); setError(''); setResult(null);
+    if (!form.nik || !form.nama) {
+      setError('NIK dan Nama wajib diisi.');
+      return;
+    }
+    setLoading(true);
+    setError('');
+    setResult(null);
 
     try {
-      const canvas  = document.createElement('canvas');
+      const canvas = document.createElement('canvas');
       const W = 856, H = 540;
       canvas.width  = W;
       canvas.height = H;
       const ctx = canvas.getContext('2d');
 
-      // Load template
       const tpl = await loadImage(TEMPLATE_URL);
       ctx.drawImage(tpl, 0, 0, W, H);
 
-      // ── Header Provinsi/Kota ──────────────────────────────────────────
+      // Header Provinsi/Kota
       ctx.textAlign = 'center';
       if (form.provinsi.trim()) {
         ctx.font      = 'bold 22px Arial Narrow, Arial';
         ctx.fillStyle = '#00008B';
-        ctx.fillText(`PROVINSI ${form.provinsi.trim().toUpperCase()}`, W / 2, 38);
+        ctx.fillText(
+          'PROVINSI ' + form.provinsi.trim().toUpperCase(),
+          W / 2, 38
+        );
       }
       if (form.kota.trim()) {
         ctx.font      = 'bold 18px Arial Narrow, Arial';
         ctx.fillStyle = '#00008B';
-        ctx.fillText(`${form.kota.trim().toUpperCase()}`, W / 2, 60);
+        ctx.fillText(form.kota.trim().toUpperCase(), W / 2, 60);
       }
 
-      // ── Text fields ───────────────────────────────────────────────────
+      // Hanya tulis NILAI — label sudah ada di template
       ctx.textAlign = 'left';
       ctx.fillStyle = '#0a0a0a';
 
-      // Font sama seperti KTP asli
-      const fontNIK    = 'bold 17px Arial Narrow, Arial';
-      const fontVal    = 'bold 13px Arial Narrow, Arial';  // nilai data
-      const fontLabel  = '13px Arial Narrow, Arial';       // label kiri
+      const fontNIK = 'bold 16px Arial Narrow, Arial';
+      const fontVal = 'bold 13px Arial Narrow, Arial';
+      const VX = 205;
 
-      // Kolom: Label X=48, TitikDua X=185, Nilai X=200
-      const LX = 48;   // label
-      const TX = 185;  // titik dua
-      const VX = 200;  // nilai
+      ctx.font = fontNIK;
+      ctx.fillText(form.nik || '', VX, 110);
 
-      const labels = [
-        { y: 112, label: '',                    val: form.nik,                     nikStyle: true },
-        { y: 152, label: 'Nama',                val: form.nama.toUpperCase() },
-        { y: 175, label: 'Tempat/Tgl Lahir',    val: form.ttl },
-        { y: 198, label: 'Jenis Kelamin',        val: form.jenis_kelamin },
-        { y: 221, label: 'Alamat',              val: form.alamat.toUpperCase() },
-        { y: 244, label: '    RT/RW',           val: form.rt_rw },
-        { y: 267, label: '    Kel/Desa',        val: form.kel_desa.toUpperCase() },
-        { y: 290, label: '    Kecamatan',       val: form.kecamatan.toUpperCase() },
-        { y: 315, label: 'Agama',               val: form.agama },
-        { y: 338, label: 'Status Perkawinan',   val: form.status },
-        { y: 361, label: 'Pekerjaan',           val: form.pekerjaan.toUpperCase() },
-        { y: 384, label: 'Kewarganegaraan',     val: form.kewarganegaraan },
-        { y: 407, label: 'Berlaku Hingga',      val: form.masa_berlaku },
-      ];
-
-      for (const r of labels) {
-        if (r.nikStyle) {
-          // NIK baris khusus — label sudah ada di template, langsung tulis nilai
-          ctx.font = fontNIK;
-          ctx.fillStyle = '#0a0a0a';
-          ctx.fillText(r.val || '', VX, r.y);
-        } else {
-          // Label
-          ctx.font = fontLabel;
-          ctx.fillStyle = '#0a0a0a';
-          ctx.fillText(r.label, LX, r.y);
-          // Titik dua
-          ctx.fillText(':', TX, r.y);
-          // Nilai
-          ctx.font = fontVal;
-          ctx.fillText(r.val || '', VX, r.y);
-        }
-      }
-
-      // Golongan Darah — sejajar Jenis Kelamin
-      ctx.font = fontLabel;
-      ctx.fillText('Gol. Darah :', 380, 198);
       ctx.font = fontVal;
-      ctx.fillText(form.golongan_darah || '', 470, 198);
+      ctx.fillText(form.nama.toUpperCase() || '', VX, 150);
+      ctx.fillText(form.ttl || '', VX, 173);
+      ctx.fillText(form.jenis_kelamin || '', VX, 196);
+      ctx.fillText(form.alamat.toUpperCase() || '', VX, 219);
+      ctx.fillText(form.rt_rw || '', VX, 242);
+      ctx.fillText(form.kel_desa.toUpperCase() || '', VX, 265);
+      ctx.fillText(form.kecamatan.toUpperCase() || '', VX, 288);
+      ctx.fillText(form.agama || '', VX, 313);
+      ctx.fillText(form.status || '', VX, 336);
+      ctx.fillText(form.pekerjaan.toUpperCase() || '', VX, 359);
+      ctx.fillText(form.kewarganegaraan || '', VX, 382);
+      ctx.fillText(form.masa_berlaku || '', VX, 405);
 
-      // ── Foto Pas ─────────────────────────────────────────────────────
+      // Golongan darah
+      ctx.fillText(form.golongan_darah || '', 500, 196);
+      // Foto Pas
       const PX = 628, PY = 88, PW = 182, PH = 230;
       if (photo) {
         const photoImg = await loadImageFromFile(photo);
-        // Crop center
         const ratio = Math.max(PW / photoImg.width, PH / photoImg.height);
-        const sw    = PW / ratio, sh = PH / ratio;
-        const sx    = (photoImg.width - sw) / 2, sy = (photoImg.height - sh) / 2;
+        const sw = PW / ratio, sh = PH / ratio;
+        const sx = (photoImg.width - sw) / 2;
+        const sy = (photoImg.height - sh) / 2;
         ctx.drawImage(photoImg, sx, sy, sw, sh, PX, PY, PW, PH);
       }
 
-      // ── Kota Terbit + Tanggal ─────────────────────────────────────────
+      // Kota Terbit + Tanggal
       const kotaTerbit = form.kota_terbit.trim() || form.kota.trim() || '';
       const tglTerbit  = form.tgl_terbit.trim() || '';
       if (kotaTerbit || tglTerbit) {
         ctx.font      = 'bold 12px Arial Narrow, Arial';
-        ctx.fillStyle = '#1a1a1a';
+        ctx.fillStyle = '#0a0a0a';
         ctx.textAlign = 'center';
         ctx.fillText(kotaTerbit.toUpperCase(), 715, 320);
         ctx.fillText(tglTerbit, 715, 336);
       }
 
-      // ── Tanda Tangan ──────────────────────────────────────────────────
+      // Tanda Tangan
       if (hasSig && sigRef.current) {
         ctx.drawImage(sigRef.current, 625, 348, 185, 75);
       }
 
       setResult(canvas.toDataURL('image/jpeg', 0.95));
 
-      // Track usage
       fetch('/api/stats', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -231,7 +213,7 @@ export default function EKTPPage() {
     if (!result) return;
     const a = document.createElement('a');
     a.href     = result;
-    a.download = `ektp-${form.nama || 'meg'}.jpg`;
+    a.download = 'ektp-' + (form.nama || 'meg') + '.jpg';
     a.click();
   };
 
@@ -241,30 +223,37 @@ export default function EKTPPage() {
       <div className="page-wrap">
 
         <div className="page-header">
-          <div className="page-badge"><i className="fa-solid fa-id-card" /><span>MAKER TOOLS</span></div>
-          <h1 className="page-title">Fake e-KTP</h1>
-          <p className="page-subtitle">Generate KTP palsu untuk kebutuhan desain, konten, atau hiburan</p>
+          <div className="page-badge">
+            <i className="fa-solid fa-id-card" />
+            <span>MAKER TOOLS</span>
           </div>
+          <h1 className="page-title">Fake e-KTP</h1>
+          <p className="page-subtitle">
+            Generate KTP palsu untuk kebutuhan desain, konten, atau hiburan
+          </p>
+        </div>
 
         <div className="alert-info-box">
           <i className="fa-solid fa-triangle-exclamation" />
           {' '}Hanya untuk hiburan & desain. Jangan untuk penipuan.
         </div>
 
-        {/* Tab Navigation */}
         <div className="tabs">
           {[
             ['data','fa-pen','Data KTP'],
             ['foto','fa-image','Foto Pas'],
             ['ttd','fa-signature','TTD'],
           ].map(([t,ic,lb])=>(
-            <button key={t} className={`tab${activeTab===t?' tab--active':''}`} onClick={()=>setActiveTab(t)}>
-              <i className={`fa-solid ${ic}`}/> {lb}
+            <button
+              key={t}
+              className={'tab' + (activeTab===t ? ' tab--active' : '')}
+              onClick={()=>setActiveTab(t)}
+            >
+              <i className={'fa-solid ' + ic}/> {lb}
             </button>
           ))}
         </div>
 
-        {/* Tab: Data KTP */}
         {activeTab === 'data' && (
           <div className="form-card">
             <div className="form-grid">
@@ -296,17 +285,20 @@ export default function EKTPPage() {
                   onChange={e=>set('ttl',e.target.value)} />
               </Field>
               <Field label="Jenis Kelamin">
-                <select value={form.jenis_kelamin} onChange={e=>set('jenis_kelamin',e.target.value)}>
+                <select value={form.jenis_kelamin}
+                  onChange={e=>set('jenis_kelamin',e.target.value)}>
                   {GENDERS.map(g=><option key={g}>{g}</option>)}
                 </select>
               </Field>
               <Field label="Golongan Darah">
-                <select value={form.golongan_darah} onChange={e=>set('golongan_darah',e.target.value)}>
+                <select value={form.golongan_darah}
+                  onChange={e=>set('golongan_darah',e.target.value)}>
                   {BLOOD_TYPES.map(b=><option key={b}>{b}</option>)}
                 </select>
               </Field>
               <Field label="Agama">
-                <select value={form.agama} onChange={e=>set('agama',e.target.value)}>
+                <select value={form.agama}
+                  onChange={e=>set('agama',e.target.value)}>
                   {RELIGIONS.map(r=><option key={r}>{r}</option>)}
                 </select>
               </Field>
@@ -316,7 +308,9 @@ export default function EKTPPage() {
                   onChange={e=>set('alamat',e.target.value.toUpperCase())} />
               </Field>
               <Field label="RT/RW">
-                <input type="text" placeholder="001/002" value={form.rt_rw} onChange={e=>set('rt_rw',e.target.value)} />
+                <input type="text" placeholder="001/002"
+                  value={form.rt_rw}
+                  onChange={e=>set('rt_rw',e.target.value)} />
               </Field>
               <Field label="Kelurahan / Desa">
                 <input type="text" placeholder="MERDEKA"
@@ -329,7 +323,8 @@ export default function EKTPPage() {
                   onChange={e=>set('kecamatan',e.target.value.toUpperCase())} />
               </Field>
               <Field label="Status Perkawinan">
-                <select value={form.status} onChange={e=>set('status',e.target.value)}>
+                <select value={form.status}
+                  onChange={e=>set('status',e.target.value)}>
                   {MARITAL.map(s=><option key={s}>{s}</option>)}
                 </select>
               </Field>
@@ -339,7 +334,8 @@ export default function EKTPPage() {
                   onChange={e=>set('pekerjaan',e.target.value.toUpperCase())} />
               </Field>
               <Field label="Kewarganegaraan">
-                <select value={form.kewarganegaraan} onChange={e=>set('kewarganegaraan',e.target.value)}>
+                <select value={form.kewarganegaraan}
+                  onChange={e=>set('kewarganegaraan',e.target.value)}>
                   {CITIZENSHIPS.map(c=><option key={c}>{c}</option>)}
                 </select>
               </Field>
@@ -366,18 +362,19 @@ export default function EKTPPage() {
           </div>
         )}
 
-        {/* Tab: Foto */}
         {activeTab === 'foto' && (
           <div className="form-card">
             <div className="field">
               <label className="field-label-big">Upload Foto Pas</label>
-              <div className="photo-upload" onClick={()=>photoRef.current?.click()}>
+              <div className="photo-upload"
+                onClick={()=>photoRef.current?.click()}>
                 <input ref={photoRef} type="file"
                   accept="image/*"
                   style={{display:'none'}}
                   onChange={e=>handlePhoto(e.target.files?.[0])} />
                 {photoPreview
-                  ? <img src={photoPreview} alt="Foto" className="photo-preview" />
+                  ? <img src={photoPreview} alt="Foto"
+                      className="photo-preview" />
                   : <div className="photo-placeholder">
                       <i className="fa-solid fa-user"/>
                       <span>Tap untuk upload foto</span>
@@ -385,11 +382,14 @@ export default function EKTPPage() {
                 }
               </div>
               {photoPreview && (
-                <button className="change-photo" onClick={()=>{setPhoto(null);setPhotoPreview(null);}}>
+                <button className="change-photo"
+                  onClick={()=>{setPhoto(null);setPhotoPreview(null);}}>
                   <i className="fa-solid fa-rotate-left"/> Ganti Foto
                 </button>
               )}
-              <p className="field-hint">Foto akan otomatis dicrop ke ukuran pas foto KTP</p>
+              <p className="field-hint">
+                Foto akan otomatis dicrop ke ukuran pas foto KTP
+              </p>
             </div>
             <div className="nav-row">
               <button className="btn-back"
@@ -403,21 +403,27 @@ export default function EKTPPage() {
             </div>
           </div>
         )}
-
-        {/* Tab: Tanda Tangan */}
-        {activeTab === 'ttd' && (
+{activeTab === 'ttd' && (
           <div className="form-card">
             <label className="field-label-big">Gambar Tanda Tangan</label>
-            <p className="field-hint" style={{marginBottom:'10px'}}>Gambar tanda tanganmu di area putih di bawah ini</p>
+            <p className="field-hint" style={{marginBottom:'10px'}}>
+              Gambar tanda tanganmu di area putih di bawah ini
+            </p>
             <div className="sig-wrap">
               <canvas
                 ref={sigRef}
                 className="sig-canvas"
-                onMouseDown={sigStart} onMouseMove={sigMove} onMouseUp={sigEnd} onMouseLeave={sigEnd}
-                onTouchStart={sigStart} onTouchMove={sigMove} onTouchEnd={sigEnd}
+                onMouseDown={sigStart}
+                onMouseMove={sigMove}
+                onMouseUp={sigEnd}
+                onMouseLeave={sigEnd}
+                onTouchStart={sigStart}
+                onTouchMove={sigMove}
+                onTouchEnd={sigEnd}
               />
             </div>
-            <button className="change-photo" onClick={clearSig} style={{marginTop:'8px'}}>
+            <button className="change-photo" onClick={clearSig}
+              style={{marginTop:'8px'}}>
               <i className="fa-solid fa-eraser"/> Hapus
             </button>
             <div className="nav-row" style={{marginTop:'16px'}}>
@@ -425,7 +431,9 @@ export default function EKTPPage() {
                 onClick={()=>setActiveTab('foto')}>
                 <i className="fa-solid fa-arrow-left"/> Kembali
               </button>
-              <button className="btn-generate" onClick={generateKTP} disabled={loading}>
+              <button className="btn-generate"
+                onClick={generateKTP}
+                disabled={loading}>
                 {loading
                   ? <><span className="spinner"/> Generating...</>
                   : <><i className="fa-solid fa-id-card"/> Generate KTP</>
@@ -436,13 +444,16 @@ export default function EKTPPage() {
         )}
 
         {error && (
-          <div className="alert-error"><i className="fa-solid fa-circle-exclamation"/> {error}</div>
+          <div className="alert-error">
+            <i className="fa-solid fa-circle-exclamation"/> {error}
+          </div>
         )}
 
-        {/* Result */}
         {result && (
           <div className="result-card">
-            <div className="card-title"><i className="fa-solid fa-check-circle"/> HASIL</div>
+            <div className="card-title">
+              <i className="fa-solid fa-check-circle"/> HASIL
+            </div>
             <div className="result-img-wrap">
               <img src={result} alt="e-KTP" className="result-img"/>
             </div>
@@ -459,7 +470,11 @@ export default function EKTPPage() {
           </div>
         )}
 
-        <div style={{'--gray-400':'var(--muted)','--gray-600':'var(--border)','--white':'var(--text)'}}>
+        <div style={{
+          '--gray-400':'var(--muted)',
+          '--gray-600':'var(--border)',
+          '--white':'var(--text)',
+        }}>
           <ToolStats toolId="ektp"/>
         </div>
 
@@ -490,7 +505,7 @@ export default function EKTPPage() {
           border:1.5px solid var(--border);
           font-family:var(--font-mono);
           font-size:0.6rem;
-                    letter-spacing:3px;
+          letter-spacing:3px;
           color:var(--muted);
           text-transform:uppercase;
           margin-bottom:10px;
@@ -521,7 +536,6 @@ export default function EKTPPage() {
         }
         .tabs {
           display:flex;
-          gap:0;
           margin-bottom:16px;
           border:2px solid var(--border);
         }
@@ -627,7 +641,6 @@ export default function EKTPPage() {
           height:160px;
           border:2px solid var(--border);
           background:#fff;
-          position:relative;
         }
         .sig-canvas {
           width:100%;
@@ -700,11 +713,7 @@ export default function EKTPPage() {
           display:flex;
           justify-content:center;
         }
-        .result-img {
-          max-width:100%;
-          display:block;
-          border-radius:4px;
-        }
+        .result-img { max-width:100%; display:block; }
         .action-row { display:flex; gap:10px; }
         .action-row .btn-outline { flex:1; justify-content:center; }
         .action-row .btn-primary { flex:2; justify-content:center; }
@@ -717,23 +726,31 @@ export default function EKTPPage() {
   );
 }
 
-// ── Helpers ──────────────────────────────────────────────────────────────────
 function loadImage(url) {
   return new Promise((resolve, reject) => {
     const img = new Image();
     img.crossOrigin = 'anonymous';
-    img.onload  = () => resolve(img);
-    img.onerror = () => reject(new Error('Gagal load gambar: ' + url));
+    img.onload = () => resolve(img);
+    img.onerror = () => {
+      const img2 = new Image();
+      img2.onload = () => resolve(img2);
+      img2.onerror = () => reject(new Error('Gagal load template'));
+      img2.src = url + '?t=' + Date.now();
+    };
     img.src = url;
   });
 }
 
 function loadImageFromFile(file) {
   return new Promise((resolve, reject) => {
-    const url = URL.createObjectURL(file);
-    const img = new Image();
-    img.onload  = () => { URL.revokeObjectURL(url); resolve(img); };
-    img.onerror = () => reject(new Error('Gagal load foto'));
-    img.src = url;
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const img = new Image();
+      img.onload = () => resolve(img);
+      img.onerror = () => reject(new Error('Gagal load foto'));
+      img.src = e.target.result;
+    };
+    reader.onerror = () => reject(new Error('Gagal baca file foto'));
+    reader.readAsDataURL(file);
   });
-}
+                }
