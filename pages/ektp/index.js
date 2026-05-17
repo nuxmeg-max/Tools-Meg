@@ -469,4 +469,4 @@ function loadImageFromFile(file) {
     img.onerror = () => reject(new Error('Gagal load foto'));
     img.src = url;
   });
-}
+} 
