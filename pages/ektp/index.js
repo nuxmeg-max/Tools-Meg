@@ -10,7 +10,7 @@ const RELIGIONS    = ['ISLAM', 'KRISTEN', 'KATOLIK', 'HINDU', 'BUDDHA', 'KONGHUC
 const MARITAL      = ['BELUM KAWIN', 'KAWIN', 'CERAI HIDUP', 'CERAI MATI'];
 const CITIZENSHIPS = ['WNI', 'WNA'];
 
-const TEMPLATE_URL = 'https://d.top4top.io/p_3788cjsus1.jpg';
+const TEMPLATE_URL = '/ktp-template.jpg';
 
 const defaultForm = {
   nik: '', nama: '', provinsi: '', kota: '', ttl: '',
