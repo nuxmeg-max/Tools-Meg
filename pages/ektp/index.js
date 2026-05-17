@@ -217,40 +217,7 @@ export default function EKTPPage() {
     a.download = 'ektp-' + (form.nama || 'meg') + '.jpg';
     a.click();
   };
-  // Foto Pas
-      const PX = 628, PY = 88, PW = 182, PH = 230;
-      if (photo) {
-        const photoImg = await loadImageFromFile(photo);
-        const ratio = Math.max(PW / photoImg.width, PH / photoImg.height);
-        const sw = PW / ratio, sh = PH / ratio;
-        const sx = (photoImg.width - sw) / 2;
-        const sy = (photoImg.height - sh) / 2;
-        ctx.drawImage(photoImg, sx, sy, sw, sh, PX, PY, PW, PH);
-      }
 
-      // Kota Terbit + Tanggal
-      const kotaTerbit = form.kota_terbit.trim() || form.kota.trim() || '';
-      const tglTerbit  = form.tgl_terbit.trim() || '';
-      if (kotaTerbit || tglTerbit) {
-        ctx.font      = 'bold 12px Arial Narrow, Arial';
-        ctx.fillStyle = '#0a0a0a';
-        ctx.textAlign = 'center';
-        ctx.fillText(kotaTerbit.toUpperCase(), 715, 320);
-        ctx.fillText(tglTerbit, 715, 336);
-      }
-
-      // Tanda Tangan
-      if (hasSig && sigRef.current) {
-        ctx.drawImage(sigRef.current, 625, 348, 185, 75);
-      }
-
-      setResult(canvas.toDataURL('image/jpeg', 0.95));
-
-      fetch('/api/stats', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ tool: 'ektp', action: 'use' }),
-      }).catch(() => {});
 
     } catch (err) {
       setError('Gagal generate KTP: ' + err.message);
