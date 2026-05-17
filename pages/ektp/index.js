@@ -244,15 +244,20 @@ export default function EKTPPage() {
           <div className="page-badge"><i className="fa-solid fa-id-card" /><span>MAKER TOOLS</span></div>
           <h1 className="page-title">Fake e-KTP</h1>
           <p className="page-subtitle">Generate KTP palsu untuk kebutuhan desain, konten, atau hiburan</p>
-        </div>
+          </div>
 
         <div className="alert-info-box">
-          <i className="fa-solid fa-triangle-exclamation" /> Hanya untuk hiburan & keperluan desain. Jangan digunakan untuk penipuan.
+          <i className="fa-solid fa-triangle-exclamation" />
+          {' '}Hanya untuk hiburan & desain. Jangan untuk penipuan.
         </div>
 
         {/* Tab Navigation */}
         <div className="tabs">
-          {[['data','fa-pen','Data KTP'],['foto','fa-image','Foto Pas'],['ttd','fa-signature','Tanda Tangan']].map(([t,ic,lb])=>(
+          {[
+            ['data','fa-pen','Data KTP'],
+            ['foto','fa-image','Foto Pas'],
+            ['ttd','fa-signature','TTD'],
+          ].map(([t,ic,lb])=>(
             <button key={t} className={`tab${activeTab===t?' tab--active':''}`} onClick={()=>setActiveTab(t)}>
               <i className={`fa-solid ${ic}`}/> {lb}
             </button>
@@ -264,19 +269,31 @@ export default function EKTPPage() {
           <div className="form-card">
             <div className="form-grid">
               <Field label="NIK (16 digit)" required>
-                <input type="text" maxLength={16} placeholder="3271234567890001" value={form.nik} onChange={e=>set('nik',e.target.value)} />
+                <input type="text" maxLength={16}
+                  placeholder="3271234567890001"
+                  value={form.nik}
+                  onChange={e=>set('nik',e.target.value)} />
               </Field>
               <Field label="Nama Lengkap" required>
-                <input type="text" placeholder="BUDI SANTOSO" value={form.nama} onChange={e=>set('nama',e.target.value.toUpperCase())} />
+                <input type="text" placeholder="BUDI SANTOSO"
+                  value={form.nama}
+                  onChange={e=>set('nama',e.target.value.toUpperCase())} />
               </Field>
               <Field label="Provinsi">
-                <input type="text" placeholder="JAWA BARAT (kosongkan jika tidak mau)" value={form.provinsi} onChange={e=>set('provinsi',e.target.value)} />
+                <input type="text"
+                  placeholder="JAWA BARAT (kosongkan jika tidak mau)"
+                  value={form.provinsi}
+                  onChange={e=>set('provinsi',e.target.value)} />
               </Field>
               <Field label="Kota / Kabupaten">
-                <input type="text" placeholder="KOTA BANDUNG" value={form.kota} onChange={e=>set('kota',e.target.value)} />
+                <input type="text" placeholder="KOTA BANDUNG"
+                  value={form.kota}
+                  onChange={e=>set('kota',e.target.value)} />
               </Field>
               <Field label="Tempat, Tanggal Lahir">
-                <input type="text" placeholder="BANDUNG, 01-01-2000" value={form.ttl} onChange={e=>set('ttl',e.target.value)} />
+                <input type="text" placeholder="BANDUNG, 01-01-2000"
+                  value={form.ttl}
+                  onChange={e=>set('ttl',e.target.value)} />
               </Field>
               <Field label="Jenis Kelamin">
                 <select value={form.jenis_kelamin} onChange={e=>set('jenis_kelamin',e.target.value)}>
@@ -294,16 +311,22 @@ export default function EKTPPage() {
                 </select>
               </Field>
               <Field label="Alamat">
-                <input type="text" placeholder="JL. MERDEKA NO. 1" value={form.alamat} onChange={e=>set('alamat',e.target.value.toUpperCase())} />
+                <input type="text" placeholder="JL. MERDEKA NO. 1"
+                  value={form.alamat}
+                  onChange={e=>set('alamat',e.target.value.toUpperCase())} />
               </Field>
               <Field label="RT/RW">
                 <input type="text" placeholder="001/002" value={form.rt_rw} onChange={e=>set('rt_rw',e.target.value)} />
               </Field>
               <Field label="Kelurahan / Desa">
-                <input type="text" placeholder="MERDEKA" value={form.kel_desa} onChange={e=>set('kel_desa',e.target.value.toUpperCase())} />
+                <input type="text" placeholder="MERDEKA"
+                  value={form.kel_desa}
+                  onChange={e=>set('kel_desa',e.target.value.toUpperCase())} />
               </Field>
               <Field label="Kecamatan">
-                <input type="text" placeholder="SUKAJADI" value={form.kecamatan} onChange={e=>set('kecamatan',e.target.value.toUpperCase())} />
+                <input type="text" placeholder="SUKAJADI"
+                  value={form.kecamatan}
+                  onChange={e=>set('kecamatan',e.target.value.toUpperCase())} />
               </Field>
               <Field label="Status Perkawinan">
                 <select value={form.status} onChange={e=>set('status',e.target.value)}>
@@ -311,7 +334,9 @@ export default function EKTPPage() {
                 </select>
               </Field>
               <Field label="Pekerjaan">
-                <input type="text" placeholder="PELAJAR / MAHASISWA" value={form.pekerjaan} onChange={e=>set('pekerjaan',e.target.value.toUpperCase())} />
+                <input type="text" placeholder="PELAJAR / MAHASISWA"
+                  value={form.pekerjaan}
+                  onChange={e=>set('pekerjaan',e.target.value.toUpperCase())} />
               </Field>
               <Field label="Kewarganegaraan">
                 <select value={form.kewarganegaraan} onChange={e=>set('kewarganegaraan',e.target.value)}>
@@ -319,13 +344,20 @@ export default function EKTPPage() {
                 </select>
               </Field>
               <Field label="Masa Berlaku">
-                <input type="text" placeholder="SEUMUR HIDUP" value={form.masa_berlaku} onChange={e=>set('masa_berlaku',e.target.value.toUpperCase())} />
+                <input type="text" placeholder="SEUMUR HIDUP"
+                  value={form.masa_berlaku}
+                  onChange={e=>set('masa_berlaku',e.target.value.toUpperCase())} />
               </Field>
               <Field label="Kota Penerbitan KTP">
-                <input type="text" placeholder="BANDUNG (pojok kanan bawah)" value={form.kota_terbit} onChange={e=>set('kota_terbit',e.target.value)} />
+                <input type="text"
+                  placeholder="BANDUNG (pojok kanan bawah)"
+                  value={form.kota_terbit}
+                  onChange={e=>set('kota_terbit',e.target.value)} />
               </Field>
               <Field label="Tanggal Penerbitan">
-                <input type="text" placeholder="18-10-2022" value={form.tgl_terbit} onChange={e=>set('tgl_terbit',e.target.value)} />
+                <input type="text" placeholder="18-10-2022"
+                  value={form.tgl_terbit}
+                  onChange={e=>set('tgl_terbit',e.target.value)} />
               </Field>
             </div>
             <button className="btn-next" onClick={()=>setActiveTab('foto')}>
@@ -340,10 +372,16 @@ export default function EKTPPage() {
             <div className="field">
               <label className="field-label-big">Upload Foto Pas</label>
               <div className="photo-upload" onClick={()=>photoRef.current?.click()}>
-                <input ref={photoRef} type="file" accept="image/*" style={{display:'none'}} onChange={e=>handlePhoto(e.target.files?.[0])} />
+                <input ref={photoRef} type="file"
+                  accept="image/*"
+                  style={{display:'none'}}
+                  onChange={e=>handlePhoto(e.target.files?.[0])} />
                 {photoPreview
                   ? <img src={photoPreview} alt="Foto" className="photo-preview" />
-                  : <div className="photo-placeholder"><i className="fa-solid fa-user"/><span>Tap untuk upload foto</span></div>
+                  : <div className="photo-placeholder">
+                      <i className="fa-solid fa-user"/>
+                      <span>Tap untuk upload foto</span>
+                    </div>
                 }
               </div>
               {photoPreview && (
@@ -354,8 +392,14 @@ export default function EKTPPage() {
               <p className="field-hint">Foto akan otomatis dicrop ke ukuran pas foto KTP</p>
             </div>
             <div className="nav-row">
-              <button className="btn-back" onClick={()=>setActiveTab('data')}><i className="fa-solid fa-arrow-left"/> Kembali</button>
-              <button className="btn-next" onClick={()=>setActiveTab('ttd')}>Lanjut: TTD <i className="fa-solid fa-arrow-right"/></button>
+              <button className="btn-back"
+                onClick={()=>setActiveTab('data')}>
+                <i className="fa-solid fa-arrow-left"/> Kembali
+              </button>
+              <button className="btn-next"
+                onClick={()=>setActiveTab('ttd')}>
+                Lanjut: TTD <i className="fa-solid fa-arrow-right"/>
+              </button>
             </div>
           </div>
         )}
@@ -377,9 +421,15 @@ export default function EKTPPage() {
               <i className="fa-solid fa-eraser"/> Hapus
             </button>
             <div className="nav-row" style={{marginTop:'16px'}}>
-              <button className="btn-back" onClick={()=>setActiveTab('foto')}><i className="fa-solid fa-arrow-left"/> Kembali</button>
+              <button className="btn-back"
+                onClick={()=>setActiveTab('foto')}>
+                <i className="fa-solid fa-arrow-left"/> Kembali
+              </button>
               <button className="btn-generate" onClick={generateKTP} disabled={loading}>
-                {loading ? <><span className="spinner"/> Generating...</> : <><i className="fa-solid fa-id-card"/> Generate KTP</>}
+                {loading
+                  ? <><span className="spinner"/> Generating...</>
+                  : <><i className="fa-solid fa-id-card"/> Generate KTP</>
+                }
               </button>
             </div>
           </div>
@@ -397,8 +447,14 @@ export default function EKTPPage() {
               <img src={result} alt="e-KTP" className="result-img"/>
             </div>
             <div className="action-row">
-              <button className="btn-outline" onClick={()=>setResult(null)}><i className="fa-solid fa-rotate-left"/> Buat Ulang</button>
-              <button className="btn-primary" onClick={handleDownload}><i className="fa-solid fa-download"/> Download</button>
+              <button className="btn-outline"
+                onClick={()=>setResult(null)}>
+                <i className="fa-solid fa-rotate-left"/> Buat Ulang
+              </button>
+              <button className="btn-primary"
+                onClick={handleDownload}>
+                <i className="fa-solid fa-download"/> Download
+              </button>
             </div>
           </div>
         )}
@@ -411,25 +467,273 @@ export default function EKTPPage() {
 
       <style jsx>{`
         .field { display:flex; flex-direction:column; gap:5px; }
-        .field-label { font-family:var(--font-mono); font-size:0.65rem; letter-spacing:2px; text-transform:uppercase; color:var(--muted); }
+        .field-label {
+          font-family:var(--font-mono);
+          font-size:0.65rem;
+          letter-spacing:2px;
+          text-transform:uppercase;
+          color:var(--muted);
+        }
         .req { color:#f87171; margin-left:2px; }
-        .page-wrap { max-width:680px; margin:0 auto; padding:80px 16px 60px; min-height:100vh; }
+        .page-wrap {
+          max-width:680px;
+          margin:0 auto;
+          padding:80px 16px 60px;
+          min-height:100vh;
+        }
         .page-header { margin-bottom:16px; }
-        .page-badge { display:inline-flex; align-items:center; gap:6px; padding:4px 10px; border:1.5px solid var(--border); font-family:var(--font-mono); font-size:0.6rem; letter-spacing:3px; color:var(--muted); text-transform:uppercase; margin-bottom:10px; }
-        .page-title { font-size:1.6rem; font-weight:700; color:var(--text); margin-bottom:4px; }
+        .page-badge {
+          display:inline-flex;
+          align-items:center;
+          gap:6px;
+          padding:4px 10px;
+          border:1.5px solid var(--border);
+          font-family:var(--font-mono);
+          font-size:0.6rem;
+                    letter-spacing:3px;
+          color:var(--muted);
+          text-transform:uppercase;
+          margin-bottom:10px;
+        }
+        .page-title {
+          font-size:1.6rem;
+          font-weight:700;
+          color:var(--text);
+          margin-bottom:4px;
+        }
         .page-subtitle { font-size:0.85rem; color:var(--muted); }
-        .alert-info-box { padding:12px 16px; background:rgba(251,191,36,0.1); border:1.5px solid rgba(251,191,36,0.4); color:var(--muted); font-size:0.8rem; margin-bottom:16px; font-family:var(--font-body); }
-        .alert-error { padding:12px 16px; background:rgba(248,113,113,0.1); border-left:4px solid #f87171; color:#f87171; font-size:0.82rem; margin-top:12px; font-family:var(--font-mono); }
-
-        /* Tabs */
-        .tabs { display:flex; gap:0; margin-bottom:16px; border:2px solid var(--border); }
-        .tab { flex:1; padding:10px 4px; background:none; border:none; border-right:1px solid var(--border); color:var(--muted); font-family:var(--font-mono); font-size:0.65rem; letter-spacing:1px; cursor:pointer; transition:all 0.15s; display:flex; align-items:center; justify-content:center; gap:5px; }
+        .alert-info-box {
+          padding:12px 16px;
+          background:rgba(251,191,36,0.1);
+          border:1.5px solid rgba(251,191,36,0.4);
+          color:var(--muted);
+          font-size:0.8rem;
+          margin-bottom:16px;
+        }
+        .alert-error {
+          padding:12px 16px;
+          background:rgba(248,113,113,0.1);
+          border-left:4px solid #f87171;
+          color:#f87171;
+          font-size:0.82rem;
+          margin-top:12px;
+          font-family:var(--font-mono);
+        }
+        .tabs {
+          display:flex;
+          gap:0;
+          margin-bottom:16px;
+          border:2px solid var(--border);
+        }
+        .tab {
+          flex:1;
+          padding:10px 4px;
+          background:none;
+          border:none;
+          border-right:1px solid var(--border);
+          color:var(--muted);
+          font-family:var(--font-mono);
+          font-size:0.65rem;
+          letter-spacing:1px;
+          cursor:pointer;
+          transition:all 0.15s;
+          display:flex;
+          align-items:center;
+          justify-content:center;
+          gap:5px;
+        }
         .tab:last-child { border-right:none; }
         .tab--active { background:var(--text); color:var(--bg); }
-        .tab:hover:not(.tab--active) { background:var(--surface); color:var(--text); }
+        .tab:hover:not(.tab--active) {
+          background:var(--surface);
+          color:var(--text);
+        }
+        .form-card {
+          background:var(--surface);
+          border:2px solid var(--border);
+          box-shadow:var(--shadow);
+          padding:16px;
+          margin-bottom:12px;
+        }
+        .form-grid {
+          display:grid;
+          grid-template-columns:1fr 1fr;
+          gap:12px;
+          margin-bottom:16px;
+        }
+        .field-label-big {
+          font-family:var(--font-mono);
+          font-size:0.7rem;
+          letter-spacing:2px;
+          text-transform:uppercase;
+          color:var(--muted);
+          display:block;
+          margin-bottom:8px;
+        }
+        .field-hint {
+          font-size:0.75rem;
+          color:var(--muted);
+          margin-top:6px;
+          font-family:var(--font-body);
+        }
+        .photo-upload {
+          width:100%;
+          height:200px;
+          border:2px dashed var(--border);
+          background:var(--bg2);
+          display:flex;
+          align-items:center;
+          justify-content:center;
+          cursor:pointer;
+          transition:all 0.15s;
+          overflow:hidden;
+        }
+        .photo-upload:hover { border-color:var(--text); }
+        .photo-placeholder {
+          display:flex;
+          flex-direction:column;
+          align-items:center;
+          gap:8px;
+          color:var(--muted);
+        }
+        .photo-placeholder i { font-size:2.5rem; opacity:0.4; }
+        .photo-placeholder span {
+          font-family:var(--font-mono);
+          font-size:0.7rem;
+          letter-spacing:1px;
+        }
+        .photo-preview {
+          width:100%;
+          height:200px;
+          object-fit:cover;
+          display:block;
+        }
+        .change-photo {
+          background:none;
+          border:1px solid var(--border);
+          color:var(--muted);
+          padding:6px 12px;
+          font-size:0.7rem;
+          font-family:var(--font-mono);
+          cursor:pointer;
+          letter-spacing:1px;
+          display:inline-flex;
+          align-items:center;
+          gap:6px;
+          margin-top:8px;
+        }
+        .sig-wrap {
+          width:100%;
+          height:160px;
+          border:2px solid var(--border);
+          background:#fff;
+          position:relative;
+        }
+        .sig-canvas {
+          width:100%;
+          height:100%;
+          display:block;
+          touch-action:none;
+          cursor:crosshair;
+        }
+        .nav-row { display:flex; gap:10px; }
+        .btn-back {
+          flex:1;
+          padding:12px;
+          background:none;
+          border:2px solid var(--border);
+          color:var(--muted);
+          font-family:var(--font-display);
+          font-size:0.75rem;
+          letter-spacing:2px;
+          cursor:pointer;
+          display:flex;
+          align-items:center;
+          justify-content:center;
+          gap:8px;
+        }
+        .btn-next {
+          width:100%;
+          padding:12px;
+          background:var(--text);
+          color:var(--bg);
+          border:none;
+          font-family:var(--font-display);
+          font-size:0.75rem;
+          letter-spacing:2px;
+          cursor:pointer;
+          display:flex;
+          align-items:center;
+          justify-content:center;
+          gap:8px;
+          text-transform:uppercase;
+        }
+        .btn-generate {
+          flex:2;
+          padding:12px;
+          background:var(--text);
+          color:var(--bg);
+          border:none;
+          font-family:var(--font-display);
+          font-size:0.75rem;
+          letter-spacing:2px;
+          cursor:pointer;
+          display:flex;
+          align-items:center;
+          justify-content:center;
+          gap:8px;
+          text-transform:uppercase;
+        }
+        .btn-generate:disabled { opacity:0.6; cursor:not-allowed; }
+        .result-card {
+          background:var(--surface);
+          border:2px solid var(--border);
+          box-shadow:var(--shadow);
+          padding:16px;
+          margin-top:12px;
+        }
+        .result-img-wrap {
+          width:100%;
+          background:var(--bg2);
+          padding:12px;
+          margin-bottom:16px;
+          display:flex;
+          justify-content:center;
+        }
+        .result-img {
+          max-width:100%;
+          display:block;
+          border-radius:4px;
+        }
+        .action-row { display:flex; gap:10px; }
+        .action-row .btn-outline { flex:1; justify-content:center; }
+        .action-row .btn-primary { flex:2; justify-content:center; }
+        @media (max-width:480px) {
+          .form-grid { grid-template-columns:1fr; }
+          .action-row { flex-direction:column; }
+        }
+      `}</style>
+    </Layout>
+  );
+}
 
-        .form-card { background:var(--surface); border:2px solid var(--border); box-shadow:var(--shadow); padding:16px; margin-bottom:12px; }
-        .form-grid { display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:16px; }
+// ── Helpers ──────────────────────────────────────────────────────────────────
+function loadImage(url) {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.crossOrigin = 'anonymous';
+    img.onload  = () => resolve(img);
+    img.onerror = () => reject(new Error('Gagal load gambar: ' + url));
+    img.src = url;
+  });
+}
 
-        .field-label-big { font-family:var(--font-mono); font-size:0.7rem; letter-spacing:2px; text-transform:uppercase; color:var(--muted); display:block; margin-bottom:8px; }
-        .field-hint { font-size
+function loadImageFromFile(file) {
+  return new Promise((resolve, reject) => {
+    const url = URL.createObjectURL(file);
+    const img = new Image();
+    img.onload  = () => { URL.revokeObjectURL(url); resolve(img); };
+    img.onerror = () => reject(new Error('Gagal load foto'));
+    img.src = url;
+  });
+}
