@@ -145,29 +145,79 @@ export default function EKTPPage() {
       ctx.fillStyle = '#0a0a0a';
 
       const fontNIK = 'bold 16px Arial Narrow, Arial';
-      const fontVal = 'bold 13px Arial Narrow, Arial';
+      const fontVal = 'bold 14px Arial Narrow, Arial';
       const VX = 205;
 
       ctx.font = fontNIK;
-      ctx.fillText(form.nik || '', VX, 110);
+      ctx.fillText(form.nik || '', VX, 108);
 
       ctx.font = fontVal;
-      ctx.fillText(form.nama.toUpperCase() || '', VX, 150);
-      ctx.fillText(form.ttl || '', VX, 173);
-      ctx.fillText(form.jenis_kelamin || '', VX, 196);
-      ctx.fillText(form.alamat.toUpperCase() || '', VX, 219);
-      ctx.fillText(form.rt_rw || '', VX, 242);
-      ctx.fillText(form.kel_desa.toUpperCase() || '', VX, 265);
-      ctx.fillText(form.kecamatan.toUpperCase() || '', VX, 288);
-      ctx.fillText(form.agama || '', VX, 313);
-      ctx.fillText(form.status || '', VX, 336);
-      ctx.fillText(form.pekerjaan.toUpperCase() || '', VX, 359);
-      ctx.fillText(form.kewarganegaraan || '', VX, 382);
-      ctx.fillText(form.masa_berlaku || '', VX, 405);
+      ctx.fillText(form.nama.toUpperCase() || '', VX, 158);
+      ctx.fillText(form.ttl || '', VX, 181);
+      ctx.fillText(form.jenis_kelamin || '', VX, 204);
+      ctx.fillText(form.alamat.toUpperCase() || '', VX, 227);
+      ctx.fillText(form.rt_rw || '', VX, 250);
+      ctx.fillText(form.kel_desa.toUpperCase() || '', VX, 273);
+      ctx.fillText(form.kecamatan.toUpperCase() || '', VX, 296);
+      ctx.fillText(form.agama || '', VX, 323);
+      ctx.fillText(form.status || '', VX, 346);
+      ctx.fillText(form.pekerjaan.toUpperCase() || '', VX, 369);
+      ctx.fillText(form.kewarganegaraan || '', VX, 392);
+      ctx.fillText(form.masa_berlaku || '', VX, 415);
 
       // Golongan darah
-      ctx.fillText(form.golongan_darah || '', 500, 196);
-      // Foto Pas
+      ctx.fillText(form.golongan_darah || '', 500, 204);
+
+      // Foto Pas — tutupi kotak merah
+      const PX = 612, PY = 72, PW = 212, PH = 272;
+      if (photo) {
+        const photoImg = await loadImageFromFile(photo);
+        const ratio = Math.max(PW / photoImg.width, PH / photoImg.height);
+        const sw = PW / ratio, sh = PH / ratio;
+        const sx = (photoImg.width - sw) / 2;
+        const sy = (photoImg.height - sh) / 2;
+        ctx.drawImage(photoImg, sx, sy, sw, sh, PX, PY, PW, PH);
+      }
+
+      // Kota Terbit + Tanggal
+      const kotaTerbit = form.kota_terbit.trim() || form.kota.trim() || '';
+      const tglTerbit  = form.tgl_terbit.trim() || '';
+      if (kotaTerbit || tglTerbit) {
+        ctx.font      = 'bold 12px Arial Narrow, Arial';
+        ctx.fillStyle = '#0a0a0a';
+        ctx.textAlign = 'center';
+        ctx.fillText(kotaTerbit.toUpperCase(), 715, 355);
+        ctx.fillText(tglTerbit, 715, 371);
+      }
+
+      // Tanda Tangan
+      if (hasSig && sigRef.current) {
+        ctx.drawImage(sigRef.current, 625, 385, 185, 75);
+      }
+
+      setResult(canvas.toDataURL('image/jpeg', 0.95));
+
+      fetch('/api/stats', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ tool: 'ektp', action: 'use' }),
+      }).catch(() => {});
+
+    } catch (err) {
+      setError('Gagal generate KTP: ' + err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleDownload = () => {
+    if (!result) return;
+    const a = document.createElement('a');
+    a.href     = result;
+    a.download = 'ektp-' + (form.nama || 'meg') + '.jpg';
+    a.click();
+  };
+  // Foto Pas
       const PX = 628, PY = 88, PW = 182, PH = 230;
       if (photo) {
         const photoImg = await loadImageFromFile(photo);
