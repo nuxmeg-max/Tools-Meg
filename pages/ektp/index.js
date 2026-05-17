@@ -26,11 +26,6 @@ function Field({ label, required, children }) {
     <div className="field">
       <label className="field-label">{label}{required && <span className="req">*</span>}</label>
       {children}
-      <style jsx>{`
-        .field { display:flex; flex-direction:column; gap:5px; }
-        .field-label { font-family:var(--font-mono); font-size:0.65rem; letter-spacing:2px; text-transform:uppercase; color:var(--muted); }
-        .req { color:#f87171; margin-left:2px; }
-      `}</style>
     </div>
   );
 }
@@ -415,6 +410,9 @@ export default function EKTPPage() {
       </div>
 
       <style jsx>{`
+        .field { display:flex; flex-direction:column; gap:5px; }
+        .field-label { font-family:var(--font-mono); font-size:0.65rem; letter-spacing:2px; text-transform:uppercase; color:var(--muted); }
+        .req { color:#f87171; margin-left:2px; }
         .page-wrap { max-width:680px; margin:0 auto; padding:80px 16px 60px; min-height:100vh; }
         .page-header { margin-bottom:16px; }
         .page-badge { display:inline-flex; align-items:center; gap:6px; padding:4px 10px; border:1.5px solid var(--border); font-family:var(--font-mono); font-size:0.6rem; letter-spacing:3px; color:var(--muted); text-transform:uppercase; margin-bottom:10px; }
@@ -433,4 +431,5 @@ export default function EKTPPage() {
         .form-card { background:var(--surface); border:2px solid var(--border); box-shadow:var(--shadow); padding:16px; margin-bottom:12px; }
         .form-grid { display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:16px; }
 
-        .field-label-big { font-family:var(--font-mono); font-size:0.7rem; letter-spacing:2px; text-transform:uppercase; color:var(--muted); display:block; margin-bottom:8
+        .field-label-big { font-family:var(--font-mono); font-size:0.7rem; letter-spacing:2px; text-transform:uppercase; color:var(--muted); display:block; margin-bottom:8px; }
+        .field-hint { font-size
