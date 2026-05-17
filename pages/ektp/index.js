@@ -136,39 +136,61 @@ export default function EKTPPage() {
 
       // ── Text fields ───────────────────────────────────────────────────
       ctx.textAlign = 'left';
-      ctx.fillStyle = '#000';
+      ctx.fillStyle = '#0a0a0a';
 
-      const LX   = 208; // nilai X setelah titik dua
-      const font  = '15px Arial Narrow, Arial';
-      const fontB = 'bold 15px Arial Narrow, Arial';
+      // Font sama seperti KTP asli
+      const fontNIK    = 'bold 17px Arial Narrow, Arial';
+      const fontVal    = 'bold 13px Arial Narrow, Arial';  // nilai data
+      const fontLabel  = '13px Arial Narrow, Arial';       // label kiri
 
-      const rows = [
-        { y: 108, val: form.nik,           bold: true  },  // NIK
-        { y: 154, val: form.nama.toUpperCase() },           // Nama
-        { y: 181, val: form.ttl },                          // Tempat/Tgl Lahir
-        { y: 208, val: form.jenis_kelamin },                // Jenis Kelamin
-        { y: 236, val: form.alamat.toUpperCase() },         // Alamat
-        { y: 263, val: form.rt_rw },                        // RT/RW
-        { y: 290, val: form.kel_desa.toUpperCase() },       // Kel/Desa
-        { y: 317, val: form.kecamatan.toUpperCase() },      // Kecamatan
-        { y: 344, val: form.agama },                        // Agama
-        { y: 371, val: form.status },                       // Status
-        { y: 398, val: form.pekerjaan.toUpperCase() },      // Pekerjaan
-        { y: 425, val: form.kewarganegaraan },              // Kewarganegaraan
-        { y: 452, val: form.masa_berlaku },                 // Berlaku Hingga
+      // Kolom: Label X=48, TitikDua X=185, Nilai X=200
+      const LX = 48;   // label
+      const TX = 185;  // titik dua
+      const VX = 200;  // nilai
+
+      const labels = [
+        { y: 112, label: '',                    val: form.nik,                     nikStyle: true },
+        { y: 152, label: 'Nama',                val: form.nama.toUpperCase() },
+        { y: 175, label: 'Tempat/Tgl Lahir',    val: form.ttl },
+        { y: 198, label: 'Jenis Kelamin',        val: form.jenis_kelamin },
+        { y: 221, label: 'Alamat',              val: form.alamat.toUpperCase() },
+        { y: 244, label: '    RT/RW',           val: form.rt_rw },
+        { y: 267, label: '    Kel/Desa',        val: form.kel_desa.toUpperCase() },
+        { y: 290, label: '    Kecamatan',       val: form.kecamatan.toUpperCase() },
+        { y: 315, label: 'Agama',               val: form.agama },
+        { y: 338, label: 'Status Perkawinan',   val: form.status },
+        { y: 361, label: 'Pekerjaan',           val: form.pekerjaan.toUpperCase() },
+        { y: 384, label: 'Kewarganegaraan',     val: form.kewarganegaraan },
+        { y: 407, label: 'Berlaku Hingga',      val: form.masa_berlaku },
       ];
 
-      for (const r of rows) {
-        ctx.font = r.bold ? fontB : font;
-        ctx.fillText(r.val || '', LX, r.y);
+      for (const r of labels) {
+        if (r.nikStyle) {
+          // NIK baris khusus — label sudah ada di template, langsung tulis nilai
+          ctx.font = fontNIK;
+          ctx.fillStyle = '#0a0a0a';
+          ctx.fillText(r.val || '', VX, r.y);
+        } else {
+          // Label
+          ctx.font = fontLabel;
+          ctx.fillStyle = '#0a0a0a';
+          ctx.fillText(r.label, LX, r.y);
+          // Titik dua
+          ctx.fillText(':', TX, r.y);
+          // Nilai
+          ctx.font = fontVal;
+          ctx.fillText(r.val || '', VX, r.y);
+        }
       }
 
-      // Golongan Darah (sejajar Jenis Kelamin, posisi tengah kanan)
-      ctx.font = font;
-      ctx.fillText(form.golongan_darah, 530, 208);
+      // Golongan Darah — sejajar Jenis Kelamin
+      ctx.font = fontLabel;
+      ctx.fillText('Gol. Darah :', 380, 198);
+      ctx.font = fontVal;
+      ctx.fillText(form.golongan_darah || '', 470, 198);
 
       // ── Foto Pas ─────────────────────────────────────────────────────
-      const PX = 630, PY = 95, PW = 180, PH = 220;
+      const PX = 628, PY = 88, PW = 182, PH = 230;
       if (photo) {
         const photoImg = await loadImageFromFile(photo);
         // Crop center
@@ -182,16 +204,16 @@ export default function EKTPPage() {
       const kotaTerbit = form.kota_terbit.trim() || form.kota.trim() || '';
       const tglTerbit  = form.tgl_terbit.trim() || '';
       if (kotaTerbit || tglTerbit) {
-        ctx.font      = 'bold 13px Arial Narrow, Arial';
-        ctx.fillStyle = '#000';
+        ctx.font      = 'bold 12px Arial Narrow, Arial';
+        ctx.fillStyle = '#1a1a1a';
         ctx.textAlign = 'center';
-        ctx.fillText(`${kotaTerbit.toUpperCase()}`, 720, 330);
-        ctx.fillText(tglTerbit, 720, 348);
+        ctx.fillText(kotaTerbit.toUpperCase(), 715, 320);
+        ctx.fillText(tglTerbit, 715, 336);
       }
 
       // ── Tanda Tangan ──────────────────────────────────────────────────
       if (hasSig && sigRef.current) {
-        ctx.drawImage(sigRef.current, 630, 355, 190, 80);
+        ctx.drawImage(sigRef.current, 625, 348, 185, 75);
       }
 
       setResult(canvas.toDataURL('image/jpeg', 0.95));
@@ -411,62 +433,4 @@ export default function EKTPPage() {
         .form-card { background:var(--surface); border:2px solid var(--border); box-shadow:var(--shadow); padding:16px; margin-bottom:12px; }
         .form-grid { display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:16px; }
 
-        .field-label-big { font-family:var(--font-mono); font-size:0.7rem; letter-spacing:2px; text-transform:uppercase; color:var(--muted); display:block; margin-bottom:8px; }
-        .field-hint { font-size:0.75rem; color:var(--muted); margin-top:6px; font-family:var(--font-body); }
-
-        /* Photo */
-        .photo-upload { width:100%; height:200px; border:2px dashed var(--border); background:var(--bg2); display:flex; align-items:center; justify-content:center; cursor:pointer; transition:all 0.15s; overflow:hidden; }
-        .photo-upload:hover { border-color:var(--text); }
-        .photo-placeholder { display:flex; flex-direction:column; align-items:center; gap:8px; color:var(--muted); }
-        .photo-placeholder i { font-size:2.5rem; opacity:0.4; }
-        .photo-placeholder span { font-family:var(--font-mono); font-size:0.7rem; letter-spacing:1px; }
-        .photo-preview { width:100%; height:200px; object-fit:cover; display:block; }
-        .change-photo { background:none; border:1px solid var(--border); color:var(--muted); padding:6px 12px; font-size:0.7rem; font-family:var(--font-mono); cursor:pointer; letter-spacing:1px; display:inline-flex; align-items:center; gap:6px; margin-top:8px; }
-
-        /* Signature */
-        .sig-wrap { width:100%; height:160px; border:2px solid var(--border); background:#fff; position:relative; }
-        .sig-canvas { width:100%; height:100%; display:block; touch-action:none; cursor:crosshair; }
-
-        /* Buttons */
-        .nav-row { display:flex; gap:10px; }
-        .btn-back { flex:1; padding:12px; background:none; border:2px solid var(--border); color:var(--muted); font-family:var(--font-display); font-size:0.75rem; letter-spacing:2px; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:8px; }
-        .btn-next { width:100%; padding:12px; background:var(--text); color:var(--bg); border:none; font-family:var(--font-display); font-size:0.75rem; letter-spacing:2px; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:8px; text-transform:uppercase; }
-        .btn-generate { flex:2; padding:12px; background:var(--text); color:var(--bg); border:none; font-family:var(--font-display); font-size:0.75rem; letter-spacing:2px; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:8px; text-transform:uppercase; }
-        .btn-generate:disabled { opacity:0.6; cursor:not-allowed; }
-
-        .result-card { background:var(--surface); border:2px solid var(--border); box-shadow:var(--shadow); padding:16px; margin-top:12px; }
-        .result-img-wrap { width:100%; background:var(--bg2); padding:12px; margin-bottom:16px; display:flex; justify-content:center; }
-        .result-img { max-width:100%; display:block; border-radius:4px; }
-        .action-row { display:flex; gap:10px; }
-        .action-row .btn-outline { flex:1; justify-content:center; }
-        .action-row .btn-primary { flex:2; justify-content:center; }
-
-        @media (max-width:480px) {
-          .form-grid { grid-template-columns:1fr; }
-          .action-row { flex-direction:column; }
-        }
-      `}</style>
-    </Layout>
-  );
-}
-
-// ── Helpers ──────────────────────────────────────────────────────────────────
-function loadImage(url) {
-  return new Promise((resolve, reject) => {
-    const img = new Image();
-    img.crossOrigin = 'anonymous';
-    img.onload  = () => resolve(img);
-    img.onerror = () => reject(new Error('Gagal load gambar: ' + url));
-    img.src = url;
-  });
-}
-
-function loadImageFromFile(file) {
-  return new Promise((resolve, reject) => {
-    const url = URL.createObjectURL(file);
-    const img = new Image();
-    img.onload  = () => { URL.revokeObjectURL(url); resolve(img); };
-    img.onerror = () => reject(new Error('Gagal load foto'));
-    img.src = url;
-  });
-} 
+        .field-label-big { font-family:var(--font-mono); font-size:0.7rem; letter-spacing:2px; text-transform:uppercase; color:var(--muted); display:block; margin-bottom:8
