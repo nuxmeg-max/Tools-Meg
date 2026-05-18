@@ -43,11 +43,25 @@ export default function MirrorPage() {
     setResult(null);
 
     try {
-      const form = new FormData();
-      form.append('file', file);
+      // Convert file to base64
+      const base64 = await new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          const result = e.target.result;
+          const base64Data = result.split(',')[1];
+          resolve(base64Data);
+        };
+        reader.onerror = () => reject(new Error('Gagal baca file'));
+        reader.readAsDataURL(file);
+      });
+
       const res = await fetch('/api/mirror', {
         method: 'POST',
-        body: form,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          image: base64,
+          mimeType: file.type || 'image/jpeg',
+        }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Terjadi kesalahan.');
@@ -341,5 +355,5 @@ export default function MirrorPage() {
       `}</style>
     </Layout>
   );
-                                                              }
+          }
           
