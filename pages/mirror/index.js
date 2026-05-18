@@ -44,16 +44,13 @@ export default function MirrorPage() {
 
     try {
       // Convert file to base64
-      const base64 = await new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onload = (e) => {
-          const result = e.target.result;
-          const base64Data = result.split(',')[1];
-          resolve(base64Data);
-        };
-        reader.onerror = () => reject(new Error('Gagal baca file'));
-        reader.readAsDataURL(file);
-      });
+      const arrayBuffer = await file.arrayBuffer();
+      const bytes = new Uint8Array(arrayBuffer);
+      let binary = '';
+      for (let i = 0; i < bytes.byteLength; i++) {
+        binary += String.fromCharCode(bytes[i]);
+      }
+      const base64 = btoa(binary);
 
       const res = await fetch('/api/mirror', {
         method: 'POST',
@@ -355,5 +352,5 @@ export default function MirrorPage() {
       `}</style>
     </Layout>
   );
-          }
+                                          }
           
