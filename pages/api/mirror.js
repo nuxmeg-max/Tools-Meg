@@ -1,6 +1,4 @@
 // pages/api/mirror.js
-// Gemini image editing + rate limit 3x/hari per IP via Upstash Redis
-
 import { Redis } from '@upstash/redis';
 
 const redis = Redis.fromEnv();
@@ -29,45 +27,11 @@ worst quality, low quality, lowres, blurry, ugly, distorted, deformed, watermark
 
 export const config = {
   api: {
-    bodyParser: false,
-    responseLimit: false,
+    bodyParser: {
+      sizeLimit: '10mb',
+    },
   },
 };
-
-async function parseFormData(req) {
-  return new Promise((resolve, reject) => {
-    const chunks = [];
-    req.on('data', chunk => chunks.push(chunk));
-    req.on('end', () => {
-      const body = Buffer.concat(chunks);
-      const contentType = req.headers['content-type'] || '';
-      const boundaryMatch = contentType.match(/boundary=(.+)$/);
-      if (!boundaryMatch) return reject(new Error('Invalid content-type'));
-      const boundary = '--' + boundaryMatch[1];
-      const parts = [];
-      const bodyStr = body.toString('binary');
-      const rawParts = bodyStr.split(boundary);
-      for (const part of rawParts) {
-        if (!part || part === '--\r\n' || part.trim() === '--') continue;
-        const [rawHeaders, ...rawBodyParts] = part.split('\r\n\r\n');
-        if (!rawHeaders) continue;
-        const bodyContent = rawBodyParts.join('\r\n\r\n').replace(/\r\n$/, '');
-        const nameMatch = rawHeaders.match(/name="([^"]+)"/);
-        const filenameMatch = rawHeaders.match(/filename="([^"]+)"/);
-        const ctMatch = rawHeaders.match(/Content-Type:\s*([^\r\n]+)/i);
-        if (!nameMatch) continue;
-        parts.push({
-          name: nameMatch[1],
-          filename: filenameMatch?.[1] || null,
-          contentType: ctMatch?.[1]?.trim() || 'text/plain',
-          data: filenameMatch ? Buffer.from(bodyContent, 'binary') : bodyContent.trim(),
-        });
-      }
-      resolve(parts);
-    });
-    req.on('error', reject);
-  });
-}
 
 function getIP(req) {
   const forwarded = req.headers['x-forwarded-for'];
@@ -80,32 +44,28 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  // Rate limit check
   const ip = getIP(req);
   const today = new Date().toISOString().slice(0, 10);
   const rateKey = `mirror:${ip}:${today}`;
 
   try {
+    // Rate limit check
     const count = await redis.get(rateKey);
     const used = parseInt(count || '0');
 
     if (used >= 3) {
       return res.status(429).json({
-        error: 'Limit harian tercapai. Kamu sudah menggunakan 3x hari ini. Coba lagi besok.',
+        error: 'Limit harian tercapai. Kamu sudah 3x hari ini. Coba lagi besok.',
         limit: 3,
         used,
       });
     }
 
-    // Parse uploaded file
-    const parts = await parseFormData(req);
-    const filePart = parts.find(p => p.name === 'file');
-    if (!filePart?.data) {
-      return res.status(400).json({ error: 'File tidak ditemukan.' });
+    // Get base64 image from body
+    const { image, mimeType } = req.body;
+    if (!image) {
+      return res.status(400).json({ error: 'Gambar tidak ditemukan.' });
     }
-
-    const base64Image = filePart.data.toString('base64');
-    const mimeType = filePart.contentType || 'image/jpeg';
 
     // Call Gemini API
     const geminiRes = await fetch(
@@ -118,8 +78,8 @@ export default async function handler(req, res) {
             parts: [
               {
                 inline_data: {
-                  mime_type: mimeType,
-                  data: base64Image,
+                  mime_type: mimeType || 'image/jpeg',
+                  data: image,
                 },
               },
               { text: PROMPT },
@@ -146,7 +106,6 @@ export default async function handler(req, res) {
       throw new Error('Gemini tidak menghasilkan gambar. Coba lagi.');
     }
 
-    // Increment rate limit counter (TTL 24 jam)
     await redis.set(rateKey, used + 1, { ex: 86400 });
 
     return res.status(200).json({
