@@ -139,28 +139,31 @@ export default function EKTPPage() {
         ctx.fillStyle = '#00008B';
         ctx.fillText(form.kota.trim().toUpperCase(), W / 2, 60);
       }
-      ctx.textAlign = 'left';
+ctx.textAlign = 'left';
       ctx.fillStyle = '#0a0a0a';
-      const fontNIK = 'bold 16px Arial Narrow, Arial';
+      const fontNIK = 'bold 17px Arial Narrow, Arial';
       const fontVal = 'bold 14px Arial Narrow, Arial';
-      const VX = 205;
+      const VX = 227;
+
       ctx.font = fontNIK;
-      ctx.fillText(form.nik || '', VX, 108);
+      ctx.fillText(form.nik || '', VX, 110);
+
       ctx.font = fontVal;
-      ctx.fillText(form.nama.toUpperCase() || '', VX, 158);
-      ctx.fillText(form.ttl || '', VX, 181);
-      ctx.fillText(form.jenis_kelamin || '', VX, 204);
-      ctx.fillText(form.alamat.toUpperCase() || '', VX, 227);
-      ctx.fillText(form.rt_rw || '', VX, 250);
-      ctx.fillText(form.kel_desa.toUpperCase() || '', VX, 273);
-      ctx.fillText(form.kecamatan.toUpperCase() || '', VX, 296);
-      ctx.fillText(form.agama || '', VX, 323);
-      ctx.fillText(form.status || '', VX, 346);
-      ctx.fillText(form.pekerjaan.toUpperCase() || '', VX, 369);
-      ctx.fillText(form.kewarganegaraan || '', VX, 392);
-      ctx.fillText(form.masa_berlaku || '', VX, 415);
-      ctx.fillText(form.golongan_darah || '', 500, 204);
-      const PX = 612, PY = 72, PW = 212, PH = 272;
+      ctx.fillText(form.nama.toUpperCase() || '', VX, 160);
+      ctx.fillText(form.ttl || '', VX, 184);
+      ctx.fillText(form.jenis_kelamin || '', VX, 207);
+      ctx.fillText(form.alamat.toUpperCase() || '', VX, 230);
+      ctx.fillText(form.rt_rw || '', VX, 254);
+      ctx.fillText(form.kel_desa.toUpperCase() || '', VX, 277);
+      ctx.fillText(form.kecamatan.toUpperCase() || '', VX, 300);
+      ctx.fillText(form.agama || '', VX, 326);
+      ctx.fillText(form.status || '', VX, 349);
+      ctx.fillText(form.pekerjaan.toUpperCase() || '', VX, 373);
+      ctx.fillText(form.kewarganegaraan || '', VX, 396);
+      ctx.fillText(form.masa_berlaku || '', VX, 419);
+      ctx.fillText(form.golongan_darah || '', 483, 207);
+
+      const PX = 669, PY = 69, PW = 180, PH = 233;
       if (photo) {
         const photoImg = await loadImageFromFile(photo);
         const ratio = Math.max(PW / photoImg.width, PH / photoImg.height);
