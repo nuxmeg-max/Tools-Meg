@@ -25,10 +25,10 @@ const categories = [
     label: 'Maker Tools',
     tools: [
       { href: '/text-styler', icon: 'fa-solid fa-font', iconColor: '#60a5fa', label: 'Text Styler', desc: 'Gaya teks Unicode untuk bio & caption', toolId: 'text-styler' },
-      { href: '/fakegame?tab=ff', icon: 'fa-solid fa-fire', iconColor: '#ff6b2b', label: 'Fake Free Fire', desc: 'Buat profil palsu Free Fire', toolId: 'fakeff' },
-      { href: '/fakegame?tab=ml', icon: 'fa-solid fa-dragon', iconColor: '#3b82f6', label: 'Fake Mobile Legends', desc: 'Buat profil palsu Mobile Legends', toolId: 'fakeml' },
+      { href: null, icon: 'fa-solid fa-fire', iconColor: '#ff6b2b', label: 'Fake Free Fire', desc: 'Buat profil palsu Free Fire', toolId: 'fakeff', disabled: true, hideSoon: true },
+{ href: null, icon: 'fa-solid fa-dragon', iconColor: '#3b82f6', label: 'Fake Mobile Legends', desc: 'Buat profil palsu Mobile Legends', toolId: 'fakeml', disabled: true, hideSoon: true },
       { href: null, icon: 'fa-solid fa-left-right', iconColor: '#34d399', label: 'Mirror Image', desc: 'Ubah foto jadi efek mirror + iPhone frame', toolId: 'mirror', disabled: true },
-      { href: '/ektp', icon: 'fa-solid fa-id-card', iconColor: '#f59e0b', label: 'Fake e-KTP', desc: 'Generate KTP palsu untuk desain & hiburan', toolId: 'ektp' },
+      { href: null, icon: 'fa-solid fa-id-card', iconColor: '#f59e0b', label: 'Fake e-KTP', desc: 'Generate KTP palsu untuk desain & hiburan', toolId: 'ektp', disabled: true },
     ],
   },
 ];
@@ -171,7 +171,7 @@ export default function Home() {
                 return (
                   <CardEl key={tool.toolId} {...cardProps}>
                     {isPopular && <div className="popular-ribbon">POPULAR</div>}
-                    {tool.disabled && <div className="soon-ribbon">SOON</div>}
+                    {tool.disabled && !tool.hideSoon && <div className="soon-ribbon">SOON</div>}
 
                     <div className="tool-card-top">
                       <div className="tool-icon-wrap" style={{ background: tool.iconColor + (tool.disabled ? '11' : '22') }}>
