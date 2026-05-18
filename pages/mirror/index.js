@@ -2,16 +2,17 @@
 import Head from 'next/head';
 import { useState, useRef } from 'react';
 import Layout from '../../components/Layout';
+import ToolStats from '../../components/ToolStats';
 
 export default function MirrorPage() {
-  const [file, setFile]         = useState(null);
-  const [preview, setPreview]   = useState(null);
-  const [result, setResult]     = useState(null);
-  const [loading, setLoading]   = useState(false);
-  const [loadingMsg, setLoadingMsg] = useState('');
-  const [error, setError]       = useState('');
+  const [file, setFile] = useState(null);
+  const [preview, setPreview] = useState(null);
+  const [result, setResult] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+  const [used, setUsed] = useState(0);
   const [dragging, setDragging] = useState(false);
-  const inputRef                = useRef(null);
+  const inputRef = useRef(null);
 
   const handleFile = (f) => {
     if (!f) return;
@@ -42,62 +43,29 @@ export default function MirrorPage() {
     setResult(null);
 
     try {
-      // Step 1: Upload ke server → qu.ax
-      setLoadingMsg('Mengupload foto...');
       const form = new FormData();
       form.append('file', file);
-      const uploadRes = await fetch('/api/tomirror', { method: 'POST', body: form });
-      const uploadData = await uploadRes.json();
-      if (!uploadRes.ok) throw new Error(uploadData.error || 'Gagal upload foto.');
-
-      const imageUrl = uploadData.image_url;
-
-      // Step 2: Panggil api-faa langsung dari browser
-      setLoadingMsg('Memproses efek mirror...');
-      const apiUrl = `https://api-faa.my.id/faa/tomirror?url=${encodeURIComponent(imageUrl)}`;
-      const mirrorRes = await fetch(apiUrl);
-
-      if (!mirrorRes.ok) throw new Error(`api-faa error: ${mirrorRes.status}`);
-
-      const contentType = mirrorRes.headers.get('content-type') || '';
-
-      if (contentType.includes('application/json')) {
-        const data = await mirrorRes.json();
-        const url = data.result || data.url || data.image || data.data;
-        if (!url) throw new Error('Tidak ada URL hasil dari api-faa.');
-        setResult(url);
-      } else {
-        // Response binary image
-        const blob = await mirrorRes.blob();
-        setResult(URL.createObjectURL(blob));
-      }
-
+      const res = await fetch('/api/mirror', {
+        method: 'POST',
+        body: form,
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Terjadi kesalahan.');
+      setResult(data.result);
+      setUsed(data.used);
     } catch (err) {
       setError(err.message);
     } finally {
       setLoading(false);
-      setLoadingMsg('');
     }
   };
 
-  const handleDownload = async () => {
+  const handleDownload = () => {
     if (!result) return;
-    try {
-      const res = await fetch(result);
-      const blob = await res.blob();
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = 'mirror-meg.jpg';
-      a.click();
-      URL.revokeObjectURL(url);
-    } catch {
-      const a = document.createElement('a');
-      a.href = result;
-      a.download = 'mirror-meg.jpg';
-      a.target = '_blank';
-      a.click();
-    }
+    const a = document.createElement('a');
+    a.href = result;
+    a.download = 'mirror-meg.jpg';
+    a.click();
   };
 
   const handleReset = () => {
@@ -111,23 +79,27 @@ export default function MirrorPage() {
   return (
     <Layout>
       <Head><title>Mirror Image — MEG Tools</title></Head>
-
       <div className="page-wrap">
 
-        {/* Header */}
         <div className="page-header">
           <div className="page-badge">
-            <i className="fa-solid fa-left-right" />
-            <span>IMAGE FILTER</span>
+            <i className="fa-solid fa-wand-magic-sparkles" />
+            <span>AI TOOLS</span>
           </div>
           <h1 className="page-title">Mirror Image</h1>
-          <p className="page-subtitle">Ubah gambarmu menjadi efek mirror + iPhone frame secara otomatis</p>
+          <p className="page-subtitle">
+            Upload fotomu dan AI akan generate versi mirror selfie MacBook
+          </p>
         </div>
 
-        {/* Upload Area */}
+        <div className="limit-box">
+          <i className="fa-solid fa-clock" />
+          {' '}Limit: {used}/3 per hari
+        </div>
+
         {!preview && (
           <div
-            className={`drop-zone${dragging ? ' drop-zone--active' : ''}`}
+            className={'drop-zone' + (dragging ? ' drop-zone--active' : '')}
             onClick={() => inputRef.current?.click()}
             onDragOver={(e) => { e.preventDefault(); setDragging(true); }}
             onDragLeave={() => setDragging(false)}
@@ -148,7 +120,6 @@ export default function MirrorPage() {
           </div>
         )}
 
-        {/* Preview + Action */}
         {preview && !result && !loading && (
           <div className="preview-section">
             <div className="card-title">
@@ -162,25 +133,23 @@ export default function MirrorPage() {
                 <i className="fa-solid fa-rotate-left" /> Ganti Foto
               </button>
               <button className="btn-primary" onClick={handleSubmit}>
-                <i className="fa-solid fa-left-right" /> Buat Mirror
+                <i className="fa-solid fa-wand-magic-sparkles" /> Generate
               </button>
             </div>
           </div>
         )}
 
-        {/* Loading */}
         {loading && (
           <div className="loading-box">
             <span className="spinner" />
-            <span>{loadingMsg || 'Memproses...'}</span>
+            <span>AI sedang memproses foto... bisa 15-30 detik</span>
           </div>
         )}
 
-        {/* Error */}
         {error && (
-          <div className="alert alert-error">
+          <div className="alert-error">
             <i className="fa-solid fa-circle-exclamation" /> {error}
-            {preview && (
+            {preview && !loading && (
               <button className="retry-btn" onClick={handleSubmit}>
                 <i className="fa-solid fa-rotate-right" /> Coba Lagi
               </button>
@@ -188,7 +157,6 @@ export default function MirrorPage() {
           </div>
         )}
 
-        {/* Result */}
         {result && (
           <div className="result-section">
             <div className="card-title">
@@ -196,6 +164,9 @@ export default function MirrorPage() {
             </div>
             <div className="result-img-wrap">
               <img src={result} alt="Mirror Result" className="result-img" />
+            </div>
+            <div className="limit-used">
+              Sisa hari ini: {3 - used}x lagi
             </div>
             <div className="action-row">
               <button className="btn-outline" onClick={handleReset}>
@@ -208,105 +179,167 @@ export default function MirrorPage() {
           </div>
         )}
 
-        {/* Info */}
-        <div className="info-box">
-          <div className="card-title">
-            <i className="fa-solid fa-circle-info" /> INFO
-          </div>
-          <ul className="info-list">
-            <li><i className="fa-solid fa-check" /> Gambar diproses dengan efek mirror otomatis</li>
-            <li><i className="fa-solid fa-check" /> Ditambahkan frame iPhone untuk tampilan lebih keren</li>
-            <li><i className="fa-solid fa-check" /> Cocok untuk foto profil, konten sosmed</li>
-            <li><i className="fa-solid fa-check" /> Gratis tanpa batas</li>
-          </ul>
+        <div style={{
+          '--gray-400': 'var(--muted)',
+          '--gray-600': 'var(--border)',
+          '--white': 'var(--text)',
+        }}>
+          <ToolStats toolId="mirror" />
         </div>
 
       </div>
 
       <style jsx>{`
         .page-wrap {
-          max-width: 680px;
-          margin: 0 auto;
-          padding: 80px 16px 60px;
-          min-height: 100vh;
+          max-width:680px;
+          margin:0 auto;
+          padding:80px 16px 60px;
+          min-height:100vh;
         }
-        .page-header { margin-bottom: 24px; }
+        .page-header { margin-bottom:16px; }
         .page-badge {
-          display: inline-flex; align-items: center; gap: 6px;
-          padding: 4px 10px; border: 1.5px solid var(--border);
-          font-family: var(--font-mono); font-size: 0.6rem;
-          letter-spacing: 3px; color: var(--muted);
-          text-transform: uppercase; margin-bottom: 10px;
+          display:inline-flex;
+          align-items:center;
+          gap:6px;
+          padding:4px 10px;
+          border:1.5px solid var(--border);
+          font-family:var(--font-mono);
+          font-size:0.6rem;
+          letter-spacing:3px;
+          color:var(--muted);
+          text-transform:uppercase;
+          margin-bottom:10px;
         }
-        .page-badge i { font-size: 0.55rem; }
         .page-title {
-          font-size: 1.6rem; font-weight: 700;
-          color: var(--text); margin-bottom: 4px;
-          font-family: var(--font-body);
+          font-size:1.6rem;
+          font-weight:700;
+          color:var(--text);
+          margin-bottom:4px;
         }
-        .page-subtitle { font-size: 0.85rem; color: var(--muted); font-family: var(--font-body); }
-
+        .page-subtitle { font-size:0.85rem; color:var(--muted); }
+        .limit-box {
+          padding:10px 14px;
+          border:1.5px solid var(--border);
+          font-family:var(--font-mono);
+          font-size:0.72rem;
+          color:var(--muted);
+          letter-spacing:1px;
+          margin-bottom:16px;
+          background:var(--surface);
+        }
         .drop-zone {
-          border: 2px dashed var(--border); padding: 48px 24px;
-          text-align: center; cursor: pointer; transition: all 0.15s;
-          background: var(--surface); box-shadow: var(--shadow); margin-bottom: 16px;
+          border:2px dashed var(--border);
+          padding:48px 24px;
+          text-align:center;
+          cursor:pointer;
+          transition:all 0.15s;
+          background:var(--surface);
+          box-shadow:var(--shadow);
+          margin-bottom:16px;
         }
         .drop-zone:hover, .drop-zone--active {
-          border-style: solid; border-color: var(--text);
-          transform: translate(-2px, -2px); box-shadow: var(--shadow-lg);
+          border-style:solid;
+          border-color:var(--text);
+          transform:translate(-2px,-2px);
+          box-shadow:var(--shadow-lg);
         }
-        .drop-icon { font-size: 2.4rem; color: var(--muted); margin-bottom: 12px; opacity: 0.6; }
+        .drop-icon {
+          font-size:2.4rem;
+          color:var(--muted);
+          margin-bottom:12px;
+          opacity:0.6;
+        }
         .drop-title {
-          font-family: var(--font-display); font-size: 1rem; font-weight: 700;
-          letter-spacing: 2px; text-transform: uppercase; color: var(--text); margin-bottom: 6px;
+          font-family:var(--font-display);
+          font-size:1rem;
+          font-weight:700;
+          letter-spacing:2px;
+          text-transform:uppercase;
+          color:var(--text);
+          margin-bottom:6px;
         }
-        .drop-sub { font-family: var(--font-mono); font-size: 0.72rem; color: var(--muted); letter-spacing: 1px; }
-
+        .drop-sub {
+          font-family:var(--font-mono);
+          font-size:0.72rem;
+          color:var(--muted);
+          letter-spacing:1px;
+        }
         .preview-section, .result-section {
-          background: var(--surface); border: 2px solid var(--border);
-          box-shadow: var(--shadow); padding: 16px; margin-bottom: 16px;
+          background:var(--surface);
+          border:2px solid var(--border);
+          box-shadow:var(--shadow);
+          padding:16px;
+          margin-bottom:16px;
         }
         .preview-wrap, .result-img-wrap {
-          width: 100%; display: flex; align-items: center; justify-content: center;
-          background: var(--bg2); margin-bottom: 16px; padding: 12px;
+          width:100%;
+          display:flex;
+          align-items:center;
+          justify-content:center;
+          background:var(--bg2);
+          margin-bottom:16px;
+          padding:12px;
         }
-        .preview-img, .result-img { max-width: 100%; object-fit: contain; display: block; }
-
-        .action-row { display: flex; gap: 10px; }
-        .action-row .btn-outline { flex: 1; justify-content: center; }
-        .action-row .btn-primary { flex: 2; justify-content: center; }
-
+        .preview-img, .result-img {
+          max-width:100%;
+          object-fit:contain;
+          display:block;
+        }
         .loading-box {
-          display: flex; align-items: center; gap: 12px; padding: 16px;
-          border: 2px solid var(--border); background: var(--surface);
-          font-family: var(--font-mono); font-size: 0.78rem; color: var(--muted);
-          letter-spacing: 1px; margin-bottom: 16px; box-shadow: var(--shadow);
+          display:flex;
+          align-items:center;
+          gap:12px;
+          padding:16px;
+          border:2px solid var(--border);
+          background:var(--surface);
+          font-family:var(--font-mono);
+          font-size:0.78rem;
+          color:var(--muted);
+          letter-spacing:1px;
+          margin-bottom:16px;
+          box-shadow:var(--shadow);
         }
-
+        .alert-error {
+          display:flex;
+          flex-direction:column;
+          gap:8px;
+          padding:14px 16px;
+          background:rgba(248,113,113,0.1);
+          border-left:4px solid #f87171;
+          color:#f87171;
+          font-size:0.82rem;
+          margin-bottom:16px;
+          font-family:var(--font-mono);
+        }
         .retry-btn {
-          display: inline-flex; align-items: center; gap: 6px;
-          margin-top: 8px; background: none; border: 1px solid currentColor;
-          color: inherit; padding: 4px 10px; font-size: 0.72rem;
-          font-family: var(--font-mono); cursor: pointer; letter-spacing: 1px;
+          display:inline-flex;
+          align-items:center;
+          gap:6px;
+          background:none;
+          border:1px solid #f87171;
+          color:#f87171;
+          padding:5px 12px;
+          font-size:0.72rem;
+          font-family:var(--font-mono);
+          cursor:pointer;
+          letter-spacing:1px;
+          width:fit-content;
         }
-
-        .info-box {
-          background: var(--surface); border: 2px solid var(--border);
-          box-shadow: var(--shadow); padding: 16px; margin-top: 8px;
+        .limit-used {
+          font-family:var(--font-mono);
+          font-size:0.7rem;
+          color:var(--muted);
+          letter-spacing:1px;
+          margin-bottom:12px;
         }
-        .info-list { list-style: none; display: flex; flex-direction: column; gap: 8px; padding: 0; }
-        .info-list li {
-          display: flex; align-items: center; gap: 8px;
-          font-family: var(--font-body); font-size: 0.82rem; color: var(--muted);
-        }
-        .info-list li i { font-size: 0.65rem; color: var(--text); opacity: 0.6; flex-shrink: 0; }
-
-        @media (max-width: 400px) {
-          .action-row { flex-direction: column; }
-          .action-row .btn-outline, .action-row .btn-primary { flex: unset; }
+        .action-row { display:flex; gap:10px; }
+        .action-row .btn-outline { flex:1; justify-content:center; }
+        .action-row .btn-primary { flex:2; justify-content:center; }
+        @media (max-width:400px) {
+          .action-row { flex-direction:column; }
         }
       `}</style>
     </Layout>
   );
-          }
+                                                              }
           
