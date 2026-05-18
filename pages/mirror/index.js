@@ -11,6 +11,8 @@ export default function MirrorPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [used, setUsed] = useState(0);
+  const [fileBase64, setFileBase64] = useState(null);
+  const [fileMime, setFileMime] = useState(null);
   const [dragging, setDragging] = useState(false);
   const inputRef = useRef(null);
 
@@ -28,6 +30,14 @@ export default function MirrorPage() {
     setResult(null);
     setFile(f);
     setPreview(URL.createObjectURL(f));
+    // Read base64 immediately while file reference is fresh
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const data = e.target.result;
+      setFileBase64(data.split(',')[1]);
+      setFileMime(f.type || 'image/jpeg');
+    };
+    reader.readAsDataURL(f);
   };
 
   const handleDrop = (e) => {
@@ -43,21 +53,14 @@ export default function MirrorPage() {
     setResult(null);
 
     try {
-      // Convert file to base64
-      const arrayBuffer = await file.arrayBuffer();
-      const bytes = new Uint8Array(arrayBuffer);
-      let binary = '';
-      for (let i = 0; i < bytes.byteLength; i++) {
-        binary += String.fromCharCode(bytes[i]);
-      }
-      const base64 = btoa(binary);
+      if (!fileBase64) throw new Error('File tidak valid, coba upload ulang.');
 
       const res = await fetch('/api/mirror', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          image: base64,
-          mimeType: file.type || 'image/jpeg',
+          image: fileBase64,
+          mimeType: fileMime || 'image/jpeg',
         }),
       });
       const data = await res.json();
@@ -84,6 +87,8 @@ export default function MirrorPage() {
     setPreview(null);
     setResult(null);
     setError('');
+    setFileBase64(null);
+    setFileMime(null);
     if (inputRef.current) inputRef.current.value = '';
   };
 
@@ -352,5 +357,5 @@ export default function MirrorPage() {
       `}</style>
     </Layout>
   );
-                                          }
-          
+              }
+              
