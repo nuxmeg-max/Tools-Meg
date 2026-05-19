@@ -26,11 +26,16 @@ const categories = [
     tools: [
       { href: '/text-styler', icon: 'fa-solid fa-font', iconColor: '#60a5fa', label: 'Text Styler', desc: 'Gaya teks Unicode untuk bio & caption', toolId: 'text-styler' },
       { href: null, icon: 'fa-solid fa-fire', iconColor: '#ff6b2b', label: 'Fake Free Fire', desc: 'Buat profil palsu Free Fire', toolId: 'fakeff', disabled: true, hideSoon: true },
-{ href: null, icon: 'fa-solid fa-dragon', iconColor: '#3b82f6', label: 'Fake Mobile Legends', desc: 'Buat profil palsu Mobile Legends', toolId: 'fakeml', disabled: true, hideSoon: true },
-      { href: '/mirror', icon: 'fa-solid fa-wand-magic-sparkles', iconColor: '#a78bfa', label: 'Mirror Image', desc: 'AI generate mirror selfie MacBook dari fotomu', toolId: 'mirror' },
+      { href: null, icon: 'fa-solid fa-dragon', iconColor: '#3b82f6', label: 'Fake Mobile Legends', desc: 'Buat profil palsu Mobile Legends', toolId: 'fakeml', disabled: true, hideSoon: true },
       { href: null, icon: 'fa-solid fa-id-card', iconColor: '#f59e0b', label: 'Fake e-KTP', desc: 'Generate KTP palsu untuk desain & hiburan', toolId: 'ektp', disabled: true },
     ],
   },
+  {
+  label: 'Prompt Collection',
+  tools: [
+    { href: '/mirror', icon: 'fa-solid fa-wand-magic-sparkles', iconColor: '#a78bfa', label: 'Prompt Collection', desc: 'Kumpulan prompt AI siap pakai untuk ChatGPT & Gemini', toolId: 'mirror' },
+  ],
+},
 ];
 
 export default function Home() {
