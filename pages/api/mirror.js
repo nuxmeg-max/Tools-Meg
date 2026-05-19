@@ -49,7 +49,6 @@ export default async function handler(req, res) {
   const rateKey = `mirror:${ip}:${today}`;
 
   try {
-    // Rate limit check
     const count = await redis.get(rateKey);
     const used = parseInt(count || '0');
 
@@ -61,15 +60,13 @@ export default async function handler(req, res) {
       });
     }
 
-    // Get base64 image from body
     const { image, mimeType } = req.body;
     if (!image) {
       return res.status(400).json({ error: 'Gambar tidak ditemukan.' });
     }
 
-    // Call Gemini API
     const geminiRes = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-image:generateContent?key=${process.env.GEMINI_API_KEY}`,
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-image-preview:generateContent?key=${process.env.GEMINI_API_KEY}`,
       {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
