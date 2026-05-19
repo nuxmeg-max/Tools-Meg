@@ -19,6 +19,9 @@ const categories = [
     label: 'AI Tools',
     tools: [
       { href: '/remove-bg', icon: 'fa-solid fa-wand-magic-sparkles', iconColor: '#a78bfa', label: 'Remove Background', desc: 'Hapus background foto dengan AI', toolId: 'remove-bg' },
+      { href: '/mirror', icon: 'fa-solid fa-scroll', iconColor: '#f59e0b', label: 'Prompt Collection', desc: 'Kumpulan prompt AI siap pakai untuk ChatGPT & Gemini', toolId: 'mirror' },
+  ],
+},
     ],
   },
   {
@@ -30,10 +33,6 @@ const categories = [
       { href: null, icon: 'fa-solid fa-id-card', iconColor: '#f59e0b', label: 'Fake e-KTP', desc: 'Generate KTP palsu untuk desain & hiburan', toolId: 'ektp', disabled: true },
     ],
   },
-  {
-  label: 'Prompt Collection',
-  tools: [
-    { href: '/mirror', icon: 'fa-solid fa-wand-magic-sparkles', iconColor: '#a78bfa', label: 'Prompt Collection', desc: 'Kumpulan prompt AI siap pakai untuk ChatGPT & Gemini', toolId: 'mirror' },
   ],
 },
 ];
