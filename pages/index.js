@@ -15,13 +15,13 @@ const categories = [
 { href: '/download?tab=instagram', icon: 'fa-brands fa-instagram', iconColor: '#e1306c', label: 'Instagram Downloader', desc: 'Download foto, video, reels & stories',         toolId: 'instagram' },
 { href: '/download?tab=spotify',   icon: 'fa-brands fa-spotify',   iconColor: '#1db954', label: 'Spotify Downloader',   desc: 'Download lagu & playlist ke MP3',               toolId: 'spotify' },    ],
   },
-  {
-    label: 'AI Tools',
-    tools: [
-      { href: '/remove-bg', icon: 'fa-solid fa-wand-magic-sparkles', iconColor: '#a78bfa', label: 'Remove Background', desc: 'Hapus background foto dengan AI', toolId: 'remove-bg' },
-      { href: '/mirror', icon: 'fa-solid fa-scroll', iconColor: '#f59e0b', label: 'Prompt Collection', desc: 'Kumpulan prompt AI siap pakai untuk ChatGPT & Gemini', toolId: 'mirror' },
-  ],
-},
+{
+      label: 'AI Tools',
+      tools: [
+        { href: '/remove-bg', icon: 'fa-solid fa-wand-magic-sparkles', iconColor: '#a78bfa', label: 'Remove Background', desc: 'Hapus background foto otomatis dengan AI', toolId: 'remove-bg' },
+        { href: '/prompt', icon: 'fa-solid fa-scroll', iconColor: '#f59e0b', label: 'Prompt Collection', desc: 'Kumpulan prompt AI siap pakai', toolId: 'mirror' },
+      ],
+    },
     ],
   },
   {
