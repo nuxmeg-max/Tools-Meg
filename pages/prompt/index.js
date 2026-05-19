@@ -1,4 +1,4 @@
-// pages/mirror/index.js
+// pages/prompts/index.js
 import Head from 'next/head';
 import { useState } from 'react';
 import Layout from '../../components/Layout';
@@ -6,7 +6,7 @@ import ToolStats from '../../components/ToolStats';
 
 const PROMPTS = [
   {
-    id: 'mirror',
+    id: 'mirror-selfie',
     label: 'Mirror Selfie MacBook',
     icon: 'fa-laptop',
     desc: 'Generate foto mirror selfie di depan MacBook dengan gaya aesthetic',
@@ -59,7 +59,7 @@ worst quality, low quality, lowres, blurry, ugly, distorted, deformed, watermark
     ],
   },
   {
-    id: 'school',
+    id: 'school-candid',
     label: 'School Candid',
     icon: 'fa-school',
     desc: 'Generate foto candid over-the-shoulder gaya SMA Indonesia',
@@ -103,7 +103,7 @@ rasio aspek 9:16`,
     ],
   },
   {
-    id: 'bmw',
+    id: 'bmw-night',
     label: 'BMW M4 Night Shot',
     icon: 'fa-car',
     desc: 'Generate foto cinematic bersandar di BMW M4 modifikasi malam hari',
@@ -270,7 +270,7 @@ export default function PromptPage() {
           '--gray-600': 'var(--border)',
           '--white': 'var(--text)',
         }}>
-          <ToolStats toolId="mirror" />
+          <ToolStats toolId="prompts" />
         </div>
 
       </div>
@@ -303,7 +303,6 @@ export default function PromptPage() {
           margin-bottom:4px;
         }
         .page-subtitle { font-size:0.85rem; color:var(--muted); }
-
         .prompt-grid {
           display:flex;
           flex-direction:column;
@@ -370,7 +369,6 @@ export default function PromptPage() {
           font-size:0.8rem;
           flex-shrink:0;
         }
-
         .detail-wrap {
           display:flex;
           flex-direction:column;
@@ -418,7 +416,6 @@ export default function PromptPage() {
           margin-bottom:3px;
         }
         .detail-desc { font-size:0.8rem; color:var(--muted); }
-
         .section-title {
           font-family:var(--font-mono);
           font-size:0.65rem;
@@ -430,7 +427,6 @@ export default function PromptPage() {
           align-items:center;
           gap:6px;
         }
-
         .example-section {
           background:var(--surface);
           border:2px solid var(--border);
@@ -451,7 +447,6 @@ export default function PromptPage() {
           object-fit:contain;
           display:block;
         }
-
         .steps-section {
           background:var(--surface);
           border:2px solid var(--border);
@@ -491,7 +486,6 @@ export default function PromptPage() {
           line-height:1.4;
           font-family:var(--font-body);
         }
-
         .prompt-section {
           background:var(--surface);
           border:2px solid var(--border);
@@ -536,11 +530,10 @@ export default function PromptPage() {
           background:#22c55e;
           color:#fff;
         }
-
         @media (max-width:480px) {
           .steps-grid { grid-template-columns:1fr; }
         }
       `}</style>
     </Layout>
   );
-  }
+    }
