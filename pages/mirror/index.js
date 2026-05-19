@@ -1,195 +1,191 @@
 // pages/mirror/index.js
 import Head from 'next/head';
-import { useState, useRef } from 'react';
+import { useState } from 'react';
 import Layout from '../../components/Layout';
 import ToolStats from '../../components/ToolStats';
 
-export default function MirrorPage() {
-  const [file, setFile] = useState(null);
-  const [preview, setPreview] = useState(null);
-  const [result, setResult] = useState(null);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
-  const [used, setUsed] = useState(0);
-  const [fileBase64, setFileBase64] = useState(null);
-  const [fileMime, setFileMime] = useState(null);
-  const [dragging, setDragging] = useState(false);
-  const inputRef = useRef(null);
+const PROMPTS = [
+  {
+    id: 'mirror',
+    label: 'Mirror Selfie MacBook',
+    icon: 'fa-laptop',
+    desc: 'Generate foto mirror selfie di depan MacBook dengan gaya aesthetic',
+    ai: ['ChatGPT', 'Gemini'],
+    example: '/Example_Mirror_MacBook.jpg',
+    prompt: `Create an image using the original face from the reference photo without changing facial structure, skin tone, or identity. The face must remain identical, natural, and realistic (not AI-generated looking).
 
-  const handleFile = (f) => {
-    if (!f) return;
-    if (!f.type.startsWith('image/')) {
-      setError('File harus berupa gambar (JPG, PNG, WEBP).');
-      return;
-    }
-    if (f.size > 10 * 1024 * 1024) {
-      setError('Ukuran file maksimal 10MB.');
-      return;
-    }
-    setError('');
-    setResult(null);
-    setFile(f);
-    setPreview(URL.createObjectURL(f));
-    // Read base64 immediately while file reference is fresh
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      const data = e.target.result;
-      setFileBase64(data.split(',')[1]);
-      setFileMime(f.type || 'image/jpeg');
-    };
-    reader.readAsDataURL(f);
-  };
+Camera angle / shot composition:
+Mirror selfie on a MacBook screen, medium close-up shot (chest-up framing), slightly tilted framing (subtle tilt), primary focus on the laptop screen, realistic perspective as if photographed with a phone from in front of the screen.
 
-  const handleDrop = (e) => {
-    e.preventDefault();
-    setDragging(false);
-    handleFile(e.dataTransfer.files?.[0]);
-  };
+Outfit:
+Oversized black cotton fleece hoodie, hood worn up, no large logos, relaxed loose fit.
 
-  const handleSubmit = async () => {
-    if (!file) return;
-    setLoading(true);
-    setError('');
-    setResult(null);
+Pose:
+Head slightly lowered and tilted, hair partially covering the eyes, right hand relaxed naturally, left hand holding an iPhone as if taking a mirror selfie, cool and relaxed expression, not overly posed.
 
-    try {
-      if (!fileBase64) throw new Error('File tidak valid, coba upload ulang.');
+Environment:
+Minimalist room with dim lighting, background featuring vertical wall panels and marble texture. On the MacBook screen, a Photo Booth window is visible, with the Spotify app open beside it.
 
-      const res = await fetch('/api/mirror', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          image: fileBase64,
-          mimeType: fileMime || 'image/jpeg',
-        }),
-      });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || 'Terjadi kesalahan.');
-      setResult(data.result);
-      setUsed(data.used);
-    } catch (err) {
-      setError(err.message);
-    } finally {
-      setLoading(false);
-    }
-  };
+Lighting:
+Light coming from the MacBook screen (soft cool light) combined with subtle warm indoor ambient lighting. Natural look, no cinematic effects, no bokeh, facial details remain sharp and realistic.
 
-  const handleDownload = () => {
-    if (!result) return;
-    const a = document.createElement('a');
-    a.href = result;
-    a.download = 'mirror-meg.jpg';
-    a.click();
-  };
+Aspect ratio: 3:4
 
-  const handleReset = () => {
-    setFile(null);
-    setPreview(null);
-    setResult(null);
-    setError('');
-    setFileBase64(null);
-    setFileMime(null);
-    if (inputRef.current) inputRef.current.value = '';
+Negative prompt:
+worst quality, low quality, lowres, blurry, ugly, distorted, deformed, watermark, text, signature, bad anatomy, bad hands, missing fingers, extra limbs, fused fingers, distorted face, plastic skin, unrealistic reflection.`,
+    steps: [
+      {
+        ai: 'ChatGPT',
+        icon: 'fa-brands fa-openai',
+        color: '#10a37f',
+        steps: [
+          'Buka chatgpt.com',
+          'Upload foto wajahmu',
+          'Copy prompt di bawah lalu paste ke kolom chat',
+          'Klik Send dan tunggu hasilnya',
+        ],
+      },
+      {
+        ai: 'Gemini',
+        icon: 'fa-solid fa-gem',
+        color: '#4285f4',
+        steps: [
+          'Buka gemini.google.com',
+          'Klik icon gambar untuk upload foto wajahmu',
+          'Copy prompt di bawah lalu paste ke kolom chat',
+          'Klik Send dan tunggu hasilnya',
+        ],
+      },
+    ],
+  },
+];
+
+export default function PromptPage() {
+  const [selected, setSelected] = useState(null);
+  const [copied, setCopied] = useState(false);
+
+  const handleCopy = (text) => {
+    navigator.clipboard.writeText(text).then(() => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    });
   };
 
   return (
     <Layout>
-      <Head><title>Mirror Image — MEG Tools</title></Head>
+      <Head><title>Prompt Collection — MEG Tools</title></Head>
       <div className="page-wrap">
 
         <div className="page-header">
           <div className="page-badge">
             <i className="fa-solid fa-wand-magic-sparkles" />
-            <span>AI TOOLS</span>
+            <span>PROMPT COLLECTION</span>
           </div>
-          <h1 className="page-title">Mirror Image</h1>
+          <h1 className="page-title">Prompt Collection</h1>
           <p className="page-subtitle">
-            Upload fotomu dan AI akan generate versi mirror selfie MacBook
+            Kumpulan prompt AI siap pakai. Pilih, copy, dan paste ke ChatGPT atau Gemini.
           </p>
         </div>
 
-        <div className="limit-box">
-          <i className="fa-solid fa-clock" />
-          {' '}Limit: {used}/3 per hari
-        </div>
-
-        {!preview && (
-          <div
-            className={'drop-zone' + (dragging ? ' drop-zone--active' : '')}
-            onClick={() => inputRef.current?.click()}
-            onDragOver={(e) => { e.preventDefault(); setDragging(true); }}
-            onDragLeave={() => setDragging(false)}
-            onDrop={handleDrop}
-          >
-            <input
-              ref={inputRef}
-              type="file"
-              accept="image/*"
-              style={{ display: 'none' }}
-              onChange={(e) => handleFile(e.target.files?.[0])}
-            />
-            <div className="drop-icon">
-              <i className="fa-solid fa-cloud-arrow-up" />
-            </div>
-            <p className="drop-title">Tap atau drag foto ke sini</p>
-            <p className="drop-sub">JPG, PNG, WEBP · Maks 10MB</p>
+        {!selected && (
+          <div className="prompt-grid">
+            {PROMPTS.map(p => (
+              <div
+                key={p.id}
+                className="prompt-card"
+                onClick={() => setSelected(p)}
+              >
+                <div className="prompt-card-icon">
+                  <i className={'fa-solid ' + p.icon} />
+                </div>
+                <div className="prompt-card-info">
+                  <div className="prompt-card-label">{p.label}</div>
+                  <div className="prompt-card-desc">{p.desc}</div>
+                  <div className="prompt-card-ai">
+                    {p.ai.map(a => (
+                      <span key={a} className="ai-badge">{a}</span>
+                    ))}
+                  </div>
+                </div>
+                <i className="fa-solid fa-chevron-right prompt-card-arrow" />
+              </div>
+            ))}
           </div>
         )}
 
-        {preview && !result && !loading && (
-          <div className="preview-section">
-            <div className="card-title">
-              <i className="fa-solid fa-image" /> PREVIEW
-            </div>
-            <div className="preview-wrap">
-              <img src={preview} alt="Preview" className="preview-img" />
-            </div>
-            <div className="action-row">
-              <button className="btn-outline" onClick={handleReset}>
-                <i className="fa-solid fa-rotate-left" /> Ganti Foto
-              </button>
-              <button className="btn-primary" onClick={handleSubmit}>
-                <i className="fa-solid fa-wand-magic-sparkles" /> Generate
-              </button>
-            </div>
-          </div>
-        )}
+        {selected && (
+          <div className="detail-wrap">
+            <button
+              className="btn-back"
+              onClick={() => { setSelected(null); setCopied(false); }}
+            >
+              <i className="fa-solid fa-arrow-left" /> Kembali
+            </button>
 
-        {loading && (
-          <div className="loading-box">
-            <span className="spinner" />
-            <span>AI sedang memproses foto... bisa 15-30 detik</span>
-          </div>
-        )}
+            <div className="detail-header">
+              <div className="detail-icon">
+                <i className={'fa-solid ' + selected.icon} />
+              </div>
+              <div>
+                <div className="detail-label">{selected.label}</div>
+                <div className="detail-desc">{selected.desc}</div>
+              </div>
+            </div>
 
-        {error && (
-          <div className="alert-error">
-            <i className="fa-solid fa-circle-exclamation" /> {error}
-            {preview && !loading && (
-              <button className="retry-btn" onClick={handleSubmit}>
-                <i className="fa-solid fa-rotate-right" /> Coba Lagi
-              </button>
-            )}
-          </div>
-        )}
+            {/* Contoh Hasil */}
+            <div className="example-section">
+              <div className="section-title">
+                <i className="fa-solid fa-image" /> CONTOH HASIL
+              </div>
+              <div className="example-img-wrap">
+                <img
+                  src={selected.example}
+                  alt="Contoh hasil"
+                  className="example-img"
+                />
+              </div>
+            </div>
 
-        {result && (
-          <div className="result-section">
-            <div className="card-title">
-              <i className="fa-solid fa-check-circle" /> HASIL
+            {/* Cara Pakai */}
+            <div className="steps-section">
+              <div className="section-title">
+                <i className="fa-solid fa-list-check" /> CARA PAKAI
+              </div>
+              <div className="steps-grid">
+                {selected.steps.map(s => (
+                  <div key={s.ai} className="steps-card">
+                    <div
+                      className="steps-ai-header"
+                      style={{ color: s.color }}
+                    >
+                      <i className={s.icon} /> {s.ai}
+                    </div>
+                    <ol className="steps-list">
+                      {s.steps.map((step, i) => (
+                        <li key={i}>{step}</li>
+                      ))}
+                    </ol>
+                  </div>
+                ))}
+              </div>
             </div>
-            <div className="result-img-wrap">
-              <img src={result} alt="Mirror Result" className="result-img" />
-            </div>
-            <div className="limit-used">
-              Sisa hari ini: {3 - used}x lagi
-            </div>
-            <div className="action-row">
-              <button className="btn-outline" onClick={handleReset}>
-                <i className="fa-solid fa-rotate-left" /> Foto Baru
-              </button>
-              <button className="btn-primary" onClick={handleDownload}>
-                <i className="fa-solid fa-download" /> Download
+
+            {/* Prompt Box */}
+            <div className="prompt-section">
+              <div className="section-title">
+                <i className="fa-solid fa-code" /> PROMPT
+              </div>
+              <div className="prompt-box">
+                <pre className="prompt-text">{selected.prompt}</pre>
+              </div>
+              <button
+                className={'copy-btn' + (copied ? ' copy-btn--done' : '')}
+                onClick={() => handleCopy(selected.prompt)}
+              >
+                {copied
+                  ? <><i className="fa-solid fa-check" /> Tersalin!</>
+                  : <><i className="fa-solid fa-copy" /> Copy Prompt</>
+                }
               </button>
             </div>
           </div>
@@ -212,7 +208,7 @@ export default function MirrorPage() {
           padding:80px 16px 60px;
           min-height:100vh;
         }
-        .page-header { margin-bottom:16px; }
+        .page-header { margin-bottom:24px; }
         .page-badge {
           display:inline-flex;
           align-items:center;
@@ -233,130 +229,244 @@ export default function MirrorPage() {
           margin-bottom:4px;
         }
         .page-subtitle { font-size:0.85rem; color:var(--muted); }
-        .limit-box {
-          padding:10px 14px;
-          border:1.5px solid var(--border);
-          font-family:var(--font-mono);
-          font-size:0.72rem;
-          color:var(--muted);
-          letter-spacing:1px;
-          margin-bottom:16px;
-          background:var(--surface);
+
+        .prompt-grid {
+          display:flex;
+          flex-direction:column;
+          gap:12px;
         }
-        .drop-zone {
-          border:2px dashed var(--border);
-          padding:48px 24px;
-          text-align:center;
+        .prompt-card {
+          background:var(--surface);
+          border:2px solid var(--border);
+          box-shadow:var(--shadow);
+          padding:16px;
+          display:flex;
+          align-items:center;
+          gap:14px;
           cursor:pointer;
           transition:all 0.15s;
-          background:var(--surface);
-          box-shadow:var(--shadow);
-          margin-bottom:16px;
         }
-        .drop-zone:hover, .drop-zone--active {
-          border-style:solid;
+        .prompt-card:hover {
           border-color:var(--text);
           transform:translate(-2px,-2px);
           box-shadow:var(--shadow-lg);
         }
-        .drop-icon {
-          font-size:2.4rem;
-          color:var(--muted);
-          margin-bottom:12px;
-          opacity:0.6;
-        }
-        .drop-title {
-          font-family:var(--font-display);
-          font-size:1rem;
-          font-weight:700;
-          letter-spacing:2px;
-          text-transform:uppercase;
-          color:var(--text);
-          margin-bottom:6px;
-        }
-        .drop-sub {
-          font-family:var(--font-mono);
-          font-size:0.72rem;
-          color:var(--muted);
-          letter-spacing:1px;
-        }
-        .preview-section, .result-section {
-          background:var(--surface);
-          border:2px solid var(--border);
-          box-shadow:var(--shadow);
-          padding:16px;
-          margin-bottom:16px;
-        }
-        .preview-wrap, .result-img-wrap {
-          width:100%;
+        .prompt-card-icon {
+          width:44px;
+          height:44px;
+          background:var(--bg2);
+          border:1.5px solid var(--border);
           display:flex;
           align-items:center;
           justify-content:center;
+          font-size:1.2rem;
+          color:var(--muted);
+          flex-shrink:0;
+        }
+        .prompt-card-info { flex:1; }
+        .prompt-card-label {
+          font-family:var(--font-body);
+          font-weight:700;
+          font-size:0.95rem;
+          color:var(--text);
+          margin-bottom:3px;
+        }
+        .prompt-card-desc {
+          font-size:0.78rem;
+          color:var(--muted);
+          margin-bottom:8px;
+          line-height:1.4;
+        }
+        .prompt-card-ai {
+          display:flex;
+          gap:6px;
+          flex-wrap:wrap;
+        }
+        .ai-badge {
+          padding:2px 8px;
+          border:1px solid var(--border);
+          font-family:var(--font-mono);
+          font-size:0.6rem;
+          letter-spacing:1px;
+          color:var(--muted);
+          text-transform:uppercase;
+        }
+        .prompt-card-arrow {
+          color:var(--muted);
+          font-size:0.8rem;
+          flex-shrink:0;
+        }
+
+        .detail-wrap {
+          display:flex;
+          flex-direction:column;
+          gap:16px;
+        }
+        .btn-back {
+          display:inline-flex;
+          align-items:center;
+          gap:8px;
+          background:none;
+          border:2px solid var(--border);
+          color:var(--muted);
+          padding:8px 14px;
+          font-family:var(--font-mono);
+          font-size:0.72rem;
+          letter-spacing:1px;
+          cursor:pointer;
+          width:fit-content;
+        }
+        .detail-header {
+          display:flex;
+          align-items:center;
+          gap:14px;
+          padding:16px;
+          background:var(--surface);
+          border:2px solid var(--border);
+          box-shadow:var(--shadow);
+        }
+        .detail-icon {
+          width:48px;
+          height:48px;
           background:var(--bg2);
-          margin-bottom:16px;
+          border:1.5px solid var(--border);
+          display:flex;
+          align-items:center;
+          justify-content:center;
+          font-size:1.4rem;
+          color:var(--muted);
+          flex-shrink:0;
+        }
+        .detail-label {
+          font-weight:700;
+          font-size:1rem;
+          color:var(--text);
+          margin-bottom:3px;
+        }
+        .detail-desc { font-size:0.8rem; color:var(--muted); }
+
+        .section-title {
+          font-family:var(--font-mono);
+          font-size:0.65rem;
+          letter-spacing:3px;
+          text-transform:uppercase;
+          color:var(--muted);
+          margin-bottom:10px;
+          display:flex;
+          align-items:center;
+          gap:6px;
+        }
+
+        .example-section {
+          background:var(--surface);
+          border:2px solid var(--border);
+          box-shadow:var(--shadow);
+          padding:16px;
+        }
+        .example-img-wrap {
+          width:100%;
+          background:var(--bg2);
+          border:1.5px solid var(--border);
+          display:flex;
+          justify-content:center;
           padding:12px;
         }
-        .preview-img, .result-img {
+        .example-img {
           max-width:100%;
+          max-height:400px;
           object-fit:contain;
           display:block;
         }
-        .loading-box {
-          display:flex;
-          align-items:center;
-          gap:12px;
-          padding:16px;
-          border:2px solid var(--border);
+
+        .steps-section {
           background:var(--surface);
-          font-family:var(--font-mono);
-          font-size:0.78rem;
-          color:var(--muted);
-          letter-spacing:1px;
-          margin-bottom:16px;
+          border:2px solid var(--border);
           box-shadow:var(--shadow);
+          padding:16px;
         }
-        .alert-error {
-          display:flex;
-          flex-direction:column;
-          gap:8px;
-          padding:14px 16px;
-          background:rgba(248,113,113,0.1);
-          border-left:4px solid #f87171;
-          color:#f87171;
-          font-size:0.82rem;
-          margin-bottom:16px;
+        .steps-grid {
+          display:grid;
+          grid-template-columns:1fr 1fr;
+          gap:12px;
+        }
+        .steps-card {
+          background:var(--bg2);
+          border:1.5px solid var(--border);
+          padding:12px;
+        }
+        .steps-ai-header {
           font-family:var(--font-mono);
-        }
-        .retry-btn {
-          display:inline-flex;
+          font-size:0.72rem;
+          font-weight:700;
+          letter-spacing:1px;
+          margin-bottom:10px;
+          display:flex;
           align-items:center;
           gap:6px;
-          background:none;
-          border:1px solid #f87171;
-          color:#f87171;
-          padding:5px 12px;
-          font-size:0.72rem;
-          font-family:var(--font-mono);
-          cursor:pointer;
-          letter-spacing:1px;
-          width:fit-content;
         }
-        .limit-used {
-          font-family:var(--font-mono);
-          font-size:0.7rem;
+        .steps-list {
+          padding-left:16px;
+          margin:0;
+          display:flex;
+          flex-direction:column;
+          gap:6px;
+        }
+        .steps-list li {
+          font-size:0.75rem;
           color:var(--muted);
-          letter-spacing:1px;
-          margin-bottom:12px;
+          line-height:1.4;
+          font-family:var(--font-body);
         }
-        .action-row { display:flex; gap:10px; }
-        .action-row .btn-outline { flex:1; justify-content:center; }
-        .action-row .btn-primary { flex:2; justify-content:center; }
-        @media (max-width:400px) {
-          .action-row { flex-direction:column; }
+
+        .prompt-section {
+          background:var(--surface);
+          border:2px solid var(--border);
+          box-shadow:var(--shadow);
+          padding:16px;
+        }
+        .prompt-box {
+          background:var(--bg2);
+          border:1.5px solid var(--border);
+          padding:14px;
+          margin-bottom:12px;
+          max-height:280px;
+          overflow-y:auto;
+        }
+        .prompt-text {
+          font-family:var(--font-mono);
+          font-size:0.72rem;
+          color:var(--text);
+          white-space:pre-wrap;
+          word-break:break-word;
+          margin:0;
+          line-height:1.6;
+        }
+        .copy-btn {
+          width:100%;
+          padding:12px;
+          background:var(--text);
+          color:var(--bg);
+          border:none;
+          font-family:var(--font-display);
+          font-size:0.8rem;
+          letter-spacing:2px;
+          text-transform:uppercase;
+          cursor:pointer;
+          display:flex;
+          align-items:center;
+          justify-content:center;
+          gap:8px;
+          transition:all 0.15s;
+        }
+        .copy-btn--done {
+          background:#22c55e;
+          color:#fff;
+        }
+
+        @media (max-width:480px) {
+          .steps-grid { grid-template-columns:1fr; }
         }
       `}</style>
     </Layout>
   );
-              }
-
-
+                }
