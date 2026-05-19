@@ -58,6 +58,83 @@ worst quality, low quality, lowres, blurry, ugly, distorted, deformed, watermark
       },
     ],
   },
+  {
+    id: 'school',
+    label: 'School Candid',
+    icon: 'fa-school',
+    desc: 'Generate foto candid over-the-shoulder gaya SMA Indonesia',
+    ai: ['ChatGPT', 'Gemini'],
+    example: '/Example_School_Candid.jpg',
+    prompt: `Buat Gambar Ultra-realistis
+Subjek: seorang pria dan seorang wanita di refrensi
+Sudut kamera/framing: Framing over-the-shoulder dari belakang seorang pria, berfokus pada seorang wanita yang berdiri di latar belakang. Pria tersebut memegang smartphone hitam secara vertikal untuk mengambil foto. Komposisi vertikal gaya foto ponsel, medium shot, meniru perspektif seseorang yang kebetulan memotret.
+Outfit: Pria mengenakan seragam sekolah SMA Indonesia berupa kemeja putih lengan panjang rapi dengan celana abu-abu, lengkap dengan dasi abu-abu dan sepatu sekolah hitam. Wanita mengenakan seragam sekolah SMA Indonesia berupa kemeja putih lengan panjang, rok abu-abu panjang, hijab putih rapi, kaus kaki putih, dan sepatu sekolah hitam.
+Pose: Pria berdiri membelakangi penonton, kedua tangan terangkat sambil memegang ponsel. Wanita berdiri di kejauhan sambil tersenyum ke arah ponsel, memegang boneka teddy bear raksasa warna pink cerah dan buket bunga gelap bermotif floral.
+Lingkungan: Halaman luar ruangan dengan paving bata abu-abu. Sebuah pohon besar dengan ranting tipis dan bunga putih kecil menggantung di atas pria. Latar belakang menampilkan bangunan dengan pilar merah besar, dinding abu-abu dengan ventilasi kecil, dan dedaunan tropis hijau.
+Pencahayaan: Cahaya matahari alami yang terang langsung dari atas. Bayangan keras terlihat di lantai bata. Kontras tinggi antara pria di area teduh dan wanita yang terkena cahaya matahari. Pencahayaan siang alami dengan saturasi warna yang hidup.
+Gaya akhir: Resolusi tinggi, gaya foto genggam, tampilan seperti foto iPhone, candid, tidak terlalu sempurna. Hasil akhir harus sesuai dengan framing over-the-shoulder spesifik dan estetika foto amatir spontan seperti referensi.
+penting: pria terlihat setengah badan ketutup frame.
+Negative Prompt:
+worst quality, low quality, normal quality, lowres, blurry, ugly, distorted, deformed, watermark, text, signature, bad anatomy, bad hands, missing fingers, extra limbs, deformed iris, fused fingers, distorted face, unnatural skin, plastic, uncanny valley
+rasio aspek 9:16`,
+    steps: [
+      {
+        ai: 'ChatGPT',
+        icon: 'fa-brands fa-openai',
+        color: '#10a37f',
+        steps: [
+          'Buka chatgpt.com',
+          'Upload foto referensi pria dan wanita',
+          'Copy prompt di bawah lalu paste ke kolom chat',
+          'Klik Send dan tunggu hasilnya',
+        ],
+      },
+      {
+        ai: 'Gemini',
+        icon: 'fa-solid fa-gem',
+        color: '#4285f4',
+        steps: [
+          'Buka gemini.google.com',
+          'Upload foto referensi pria dan wanita',
+          'Copy prompt di bawah lalu paste ke kolom chat',
+          'Klik Send dan tunggu hasilnya',
+        ],
+      },
+    ],
+  },
+  {
+    id: 'bmw',
+    label: 'BMW M4 Night Shot',
+    icon: 'fa-car',
+    desc: 'Generate foto cinematic bersandar di BMW M4 modifikasi malam hari',
+    ai: ['ChatGPT', 'Gemini'],
+    example: '/Example_BMW_Lean.jpg',
+    prompt: `Create hyper realistic photo of the given character leaning on a modified White BMW M4 Racing Part, taken at night under streetlights, character facing to the camera, photo taken from high angle down, cinematic DSLR photography, EOS R5, 85mm lens, f/1.4, ISO 400, 8k resolution.`,
+    steps: [
+      {
+        ai: 'ChatGPT',
+        icon: 'fa-brands fa-openai',
+        color: '#10a37f',
+        steps: [
+          'Buka chatgpt.com',
+          'Upload foto wajahmu',
+          'Copy prompt di bawah lalu paste ke kolom chat',
+          'Klik Send dan tunggu hasilnya',
+        ],
+      },
+      {
+        ai: 'Gemini',
+        icon: 'fa-solid fa-gem',
+        color: '#4285f4',
+        steps: [
+          'Buka gemini.google.com',
+          'Klik icon gambar untuk upload foto wajahmu',
+          'Copy prompt di bawah lalu paste ke kolom chat',
+          'Klik Send dan tunggu hasilnya',
+        ],
+      },
+    ],
+  },
 ];
 
 export default function PromptPage() {
@@ -132,7 +209,6 @@ export default function PromptPage() {
               </div>
             </div>
 
-            {/* Contoh Hasil */}
             <div className="example-section">
               <div className="section-title">
                 <i className="fa-solid fa-image" /> CONTOH HASIL
@@ -146,7 +222,6 @@ export default function PromptPage() {
               </div>
             </div>
 
-            {/* Cara Pakai */}
             <div className="steps-section">
               <div className="section-title">
                 <i className="fa-solid fa-list-check" /> CARA PAKAI
@@ -170,7 +245,6 @@ export default function PromptPage() {
               </div>
             </div>
 
-            {/* Prompt Box */}
             <div className="prompt-section">
               <div className="section-title">
                 <i className="fa-solid fa-code" /> PROMPT
@@ -469,4 +543,4 @@ export default function PromptPage() {
       `}</style>
     </Layout>
   );
-                }
+  }
