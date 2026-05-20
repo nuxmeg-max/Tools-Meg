@@ -6,9 +6,9 @@ import { useRouter } from 'next/router';
 const navLinks = [
   { href: '/download',    label: 'Download',    icon: 'fa-solid fa-download' },
   { href: '/remove-bg',   label: 'Remove BG',   icon: 'fa-solid fa-wand-magic-sparkles' },
-  { href: '/mirror', label: 'Prompts', icon: 'fa-solid fa-wand-magic-sparkles' },
   { href: '/text-styler', label: 'Text Styler', icon: 'fa-solid fa-font' },
-  { href: '/ektp', label: 'e-KTP', icon: 'fa-solid fa-id-card' },
+  { href: '/prompts',     label: 'Prompts',     icon: 'fa-solid fa-scroll' },
+  { href: '/ektp',        label: 'e-KTP',       icon: 'fa-solid fa-id-card' },
 ];
 
 export default function Navbar() {
@@ -128,4 +128,4 @@ export default function Navbar() {
       `}</style>
     </>
   );
-}
+                                                  }
