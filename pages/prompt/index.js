@@ -6,22 +6,22 @@ import ToolStats from '../../components/ToolStats';
 
 const PROMPTS = [
   {
-    id: 'mirror-selfie',
-    label: 'Mirror Selfie MacBook',
+    id: 'macbook-selfie',
+    label: 'MacBook Selfie',
     icon: 'fa-laptop',
-    desc: 'Generate foto mirror selfie di depan MacBook dengan gaya aesthetic',
+    desc: 'Generate foto selfie di depan MacBook dengan gaya aesthetic',
     ai: ['ChatGPT', 'Gemini'],
     example: '/Example_Mirror_MacBook.jpg',
     prompt: `Create an image using the original face from the reference photo without changing facial structure, skin tone, or identity. The face must remain identical, natural, and realistic (not AI-generated looking).
 
 Camera angle / shot composition:
-Mirror selfie on a MacBook screen, medium close-up shot (chest-up framing), slightly tilted framing (subtle tilt), primary focus on the laptop screen, realistic perspective as if photographed with a phone from in front of the screen.
+Selfie on a MacBook screen, medium close-up shot (chest-up framing), slightly tilted framing (subtle tilt), primary focus on the laptop screen, realistic perspective as if photographed with a phone from in front of the screen.
 
 Outfit:
 Oversized black cotton fleece hoodie, hood worn up, no large logos, relaxed loose fit.
 
 Pose:
-Head slightly lowered and tilted, hair partially covering the eyes, right hand relaxed naturally, left hand holding an iPhone as if taking a mirror selfie, cool and relaxed expression, not overly posed.
+Head slightly lowered and tilted, hair partially covering the eyes, right hand relaxed naturally, left hand holding an iPhone as if taking a selfie, cool and relaxed expression, not overly posed.
 
 Environment:
 Minimalist room with dim lighting, background featuring vertical wall panels and marble texture. On the MacBook screen, a Photo Booth window is visible, with the Spotify app open beside it.
@@ -536,4 +536,4 @@ export default function PromptPage() {
       `}</style>
     </Layout>
   );
-    }
+  }
