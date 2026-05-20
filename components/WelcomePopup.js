@@ -24,12 +24,10 @@ export default function WelcomePopup() {
   const [visible, setVisible] = useState(false);
 
   useEffect(() => {
-    const seen = localStorage.getItem('meg-welcome-seen');
-    if (!seen) setVisible(true);
+    setVisible(true);
   }, []);
 
   const handleSkip = () => {
-    localStorage.setItem('meg-welcome-seen', '1');
     setVisible(false);
   };
 
