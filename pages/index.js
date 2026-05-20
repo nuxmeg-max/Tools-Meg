@@ -19,7 +19,7 @@ const categories = [
       label: 'AI Tools',
       tools: [
         { href: '/remove-bg', icon: 'fa-solid fa-wand-magic-sparkles', iconColor: '#a78bfa', label: 'Remove Background', desc: 'Hapus background foto otomatis dengan AI', toolId: 'remove-bg' },
-        { href: '/prompts', icon: 'fa-solid fa-scroll', iconColor: '#f59e0b', label: 'Prompt Collection', desc: 'Kumpulan prompt AI siap pakai', toolId: 'prompts' },
+        { href: '/prompt', icon: 'fa-solid fa-scroll', iconColor: '#f59e0b', label: 'Prompt Collection', desc: 'Kumpulan prompt AI siap pakai', toolId: 'prompt' },
       ],
     },
   {
@@ -425,4 +425,4 @@ export default function Home() {
   );
           }
 
-  
+          
