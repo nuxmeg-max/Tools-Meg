@@ -22,8 +22,6 @@ const categories = [
         { href: '/prompts', icon: 'fa-solid fa-scroll', iconColor: '#f59e0b', label: 'Prompt Collection', desc: 'Kumpulan prompt AI siap pakai', toolId: 'prompts' },
       ],
     },
-    ],
-  },
   {
     label: 'Maker Tools',
     tools: [
@@ -33,8 +31,6 @@ const categories = [
       { href: null, icon: 'fa-solid fa-id-card', iconColor: '#f59e0b', label: 'Fake e-KTP', desc: 'Generate KTP palsu untuk desain & hiburan', toolId: 'ektp', disabled: true },
     ],
   },
-  ],
-},
 ];
 
 export default function Home() {
@@ -428,4 +424,5 @@ export default function Home() {
     </Layout>
   );
           }
-          
+
+  
