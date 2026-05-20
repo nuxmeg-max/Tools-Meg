@@ -1,6 +1,7 @@
 // pages/_app.js
 import '../styles/globals.css';
 import Head from 'next/head';
+import WelcomePopup from '../components/WelcomePopup';
 
 export default function App({ Component, pageProps }) {
   return (
@@ -21,6 +22,7 @@ export default function App({ Component, pageProps }) {
         />
         <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>◈</text></svg>" />
       </Head>
+      <WelcomePopup />
       <Component {...pageProps} />
     </>
   );
