@@ -270,7 +270,7 @@ export default function PromptPage() {
           '--gray-600': 'var(--border)',
           '--white': 'var(--text)',
         }}>
-          <ToolStats toolId="prompts" />
+          <ToolStats toolId="prompt" />
         </div>
 
       </div>
@@ -536,4 +536,5 @@ export default function PromptPage() {
       `}</style>
     </Layout>
   );
-  }
+    }
+                              
